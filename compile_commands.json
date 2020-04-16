@@ -1,0 +1,161 @@
+[{
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture06\\lecture06b.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture06",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture06\\lecture06b.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture06\\lecture06b.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include -I../../include/bullet -I../../include/irrKlang -I../../include/aubio  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture06",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include -I../../include/bullet -I../../include/irrKlang -I../../include/aubio  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture06\\lecture06a.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture06",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture06\\lecture06a.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture06\\lecture06a.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture06",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture05\\lecture05b.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture05",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture05\\lecture05b.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture05\\lecture05b.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture05",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture02\\lecture02a.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture02",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture02\\lecture02a.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture02\\lecture02a.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture02",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work04\\work04a.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work04",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work04\\work04a.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work04\\work04a.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work04",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture01\\lecture01.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture01",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture01\\lecture01.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture01\\lecture01.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture01",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work01\\work01.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work01",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work01\\work01.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work01\\work01.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work01",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work03\\work03.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work03",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work03\\work03.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work03\\work03.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work03",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03\\lecture03a.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03\\lecture03a.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03\\lecture03a.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work06\\work06a.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work06",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work06\\work06a.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work06\\work06a.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work06",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03\\lecture03b.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03\\lecture03b.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03\\lecture03b.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work06\\work06b.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work06",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work06\\work06b.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work06\\work06b.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include -I../../include/bullet -I../../include/irrKlang -I../../include/aubio  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work06",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include -I../../include/bullet -I../../include/irrKlang -I../../include/aubio  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture05\\lecture05a.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture05",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture05\\lecture05a.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture05\\lecture05a.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture05",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work02\\work02.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work02",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work02\\work02.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work02\\work02.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work02",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture02\\lecture02b.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture02",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture02\\lecture02b.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture02\\lecture02b.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture02",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03\\lecture03c.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03\\lecture03c.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03\\lecture03c.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture03",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\test",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\test\\hellotriangle2.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\test",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\test\\hellotriangle2.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\test\\hellotriangle2.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture04\\lecture04a.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture04",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture04\\lecture04a.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture04\\lecture04a.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\lectures_final\\lecture04",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work05\\work05b.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work05",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work05\\work05b.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work05\\work05b.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work05",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work05\\work05a.cpp",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work05",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work05\\work05a.cpp\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work05\\work05a.cpp\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall  -std=c++0x"
+ }, {
+  "file": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c",
+  "directory": "C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\work\\work05",
+  "command": "clang  -c \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\" -o \"C:\\Users\\Super\\OneDrive\\Desktop\\UNIEcc\\RTGP\\RTGP_LAB\\1819 - AUBIO - Copia\\include\\glad\\glad.c\".o -target x86_64-pc-windows-gnu -I. -I. -I../../include  -g  -O0  -Wall"
+ }]
