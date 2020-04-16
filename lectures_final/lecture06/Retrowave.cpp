@@ -83,6 +83,9 @@ void PrintCurrentShader(int shader);
 GLint LoadTextureCube(string path);
 // draw the GUI through ImGui
 void DrawGUI();
+// Setup aubio for spectrum analysis using FFT
+void GetSpectrum(string musicPath);
+// Stop all the current audio reproductions and start a new one
 void PlayMusic(string musicPath);
 
 // we initialize an array of booleans for each keybord key
@@ -115,13 +118,22 @@ vector<Shader> shaders;
 GLfloat speed = 2.0f;
 
 // Variables
-string musicPath = "../../../Music/Invincible.mp3";
+string musicPath = "../../../Music/Prophecy.wav";
 GLfloat sunSize = 2.0f;
 GLfloat sunDepth = 0.0f;
 GLfloat gridSize = 1.0f;
 
 // texture unit for the cube map
 GLuint textureCube;
+
+// Aubio Parameters
+aubio_source_t* aubioSource; // Aubio source, used to read a media file
+uint_t win_s = 512; // window size
+uint_t hop_s = win_s / 4; // hop size
+aubio_fft_t* ftt; // Fast Fourier Transform struct
+uint_t samplerate = 0;
+fvec_t* fftin; // Input FFT variable
+cvec_t* fftout; // Output FFT VARIABLE_PITCH
 
 // Initialization of irrKlang for audio reproduction
 irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
@@ -132,7 +144,7 @@ int main()
 {
 	if (!soundEngine)
 	{
-		printf("Could not startup engine\n");
+		std::cout << "Could not startup the audio engine." << std::endl;
 		return 0; // error starting up the engine
 	}
 		
@@ -211,7 +223,6 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 150");
 
-	// we create the Shader Program used for the plane (fixed)
 	Shader grid_shader("06_procedural_base.vert", "neonGrid.frag");
 	shaders.push_back(grid_shader);
 	Shader sun_shader("retrosun.vert", "retrosunSphere.frag");
@@ -237,6 +248,7 @@ int main()
     // View matrix (=camera): position, view direction, camera "up" vector
     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 7.0f), glm::vec3(0.0f, 0.0f, -7.0f), glm::vec3(0.0f, 1.0f, 7.0f));
 	
+	GetSpectrum(musicPath);
 	soundEngine->play2D(musicPath.c_str(), true);
 	
     // Rendering loop: this code is executed at each frame
@@ -355,64 +367,6 @@ int main()
     // we close and delete the created context
     glfwTerminate();
     return 0;
-}
-
-
-void DrawGUI()
-{
-	static bool fileDialog = false;
-	static string fileName = "";
-	
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-	
-	ImGui::Begin("GeneralUI");
-	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	if(fileName.size() > 0)
-		ImGui::Text("Current Music: %s", fileName.c_str());
-	else
-		ImGui::Text("Current Music: Default");
-
-	if(ImGui::Button("Restart Music")){
-		PlayMusic(musicPath);
-	}
-	if(ImGui::Button("Change Music")){
-		soundEngine->stopAllSounds();
-		fileDialog = true;
-	}
-	
-	if(fileDialog){
-		if(ImGuiFileDialog::Instance()->FileDialog("Choose Music File", "", "../../../Music", "")){
-			if(ImGuiFileDialog::Instance()->IsOk == true){
-				fileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
-				musicPath = ImGuiFileDialog::Instance()->GetFilepathName();
-				
-				PlayMusic(musicPath);
-			}
-			else{
-				PlayMusic(musicPath);
-			}
-			fileDialog = false;
-		}
-	}
-		
-	ImGui::End();
-	
-	ImGui::Begin("Grid Parameters");
-	ImGui::SliderFloat("GridSize", &gridSize, 0.1f, 5.0f);
-	ImGui::End();
-	
-	ImGui::Begin("RetroSun Parameters");
-	ImGui::SliderFloat("AnimationSpeed", &speed, 0.0f, 10.0f);
-	ImGui::SliderFloat("SunDepth", &sunDepth, -10.0f, 10.0f);
-	ImGui::SliderFloat("Size", &sunSize, 0.5f, 10.0f);
-	ImGui::End();
-}
-
-void PlayMusic(string musicPath){
-	soundEngine->stopAllSounds();
-	soundEngine->play2D(musicPath.c_str(), true);
 }
 
 //////////////////////////////////////////
@@ -570,4 +524,81 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	  if(!mouseEnabled)
 		camera.ProcessMouseMovement(xoffset, yoffset);
 
+}
+
+void DrawGUI()
+{
+	static bool fileDialog = false;
+	static string fileName = "";
+	
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+	
+	ImGui::Begin("GeneralUI");
+	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	if(fileName.size() > 0)
+		ImGui::Text("Current Music: %s", fileName.c_str());
+	else
+		ImGui::Text("Current Music: Default");
+
+	if(ImGui::Button("Restart Music")){
+		PlayMusic(musicPath);
+	}
+	if(ImGui::Button("Change Music")){
+		soundEngine->stopAllSounds();
+		fileDialog = true;
+	}
+	
+	if(fileDialog){
+		if(ImGuiFileDialog::Instance()->FileDialog("Choose Music File", "", "../../../Music", "")){
+			if(ImGuiFileDialog::Instance()->IsOk == true){
+				fileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
+				musicPath = ImGuiFileDialog::Instance()->GetFilepathName();
+				
+				PlayMusic(musicPath);
+			}
+			else{
+				PlayMusic(musicPath);
+			}
+			fileDialog = false;
+		}
+	}
+		
+	ImGui::End();
+	
+	ImGui::Begin("AubioUI");
+	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "FFT Bands");
+	ImGui::BeginChild("Scrolling");
+	for (int n = 0; n < 50; n++)
+		ImGui::Text("%04d: %d", n, samplerate);
+	ImGui::EndChild();
+	ImGui::End();
+	
+	ImGui::Begin("Grid Parameters");
+	ImGui::SliderFloat("GridSize", &gridSize, 0.1f, 5.0f);
+	ImGui::End();
+	
+	ImGui::Begin("RetroSun Parameters");
+	ImGui::SliderFloat("AnimationSpeed", &speed, 0.0f, 10.0f);
+	ImGui::SliderFloat("SunDepth", &sunDepth, -10.0f, 10.0f);
+	ImGui::SliderFloat("Size", &sunSize, 0.5f, 10.0f);
+	ImGui::End();
+}
+
+void GetSpectrum(string musicPath)
+{
+	aubioSource = new_aubio_source(musicPath.c_str(), 0, hop_s);
+	if(!aubioSource){
+		aubio_cleanup();
+		std::cout << "Something bad happened to Aubio Source." << std::endl;
+	}
+	
+	samplerate = aubio_source_get_samplerate(aubioSource);
+}
+
+void PlayMusic(string musicPath)
+{
+	soundEngine->stopAllSounds();
+	soundEngine->play2D(musicPath.c_str(), true);
 }
