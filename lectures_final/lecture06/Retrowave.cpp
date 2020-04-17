@@ -81,10 +81,16 @@ void DeleteShaders();
 void PrintCurrentShader(int shader);
 // load the 6 images from disk and create an OpenGL cubemap
 GLint LoadTextureCube(string path);
+
 // draw the GUI through ImGui
 void DrawGUI();
+
+// Aubio reset for errors or music change
+void AubioReset(bool fftcheck);
 // Setup aubio for spectrum analysis using FFT
-void GetSpectrum(string musicPath);
+void FFTInitialize(string musicPath);
+// Compute and extract Fast Fourier Transform
+void FFTCompute();
 // Stop all the current audio reproductions and start a new one
 void PlayMusic(string musicPath);
 
@@ -126,18 +132,8 @@ GLfloat gridSize = 1.0f;
 // texture unit for the cube map
 GLuint textureCube;
 
-// Aubio Parameters
-aubio_source_t* aubioSource; // Aubio source, used to read a media file
-uint_t win_s = 512; // window size
-uint_t hop_s = win_s / 4; // hop size
-aubio_fft_t* ftt; // Fast Fourier Transform struct
-uint_t samplerate = 0;
-fvec_t* fftin; // Input FFT variable
-cvec_t* fftout; // Output FFT VARIABLE_PITCH
-
 // Initialization of irrKlang for audio reproduction
 irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
-	
 
 /////////////////// MAIN function ///////////////////////
 int main()
@@ -248,7 +244,7 @@ int main()
     // View matrix (=camera): position, view direction, camera "up" vector
     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 7.0f), glm::vec3(0.0f, 0.0f, -7.0f), glm::vec3(0.0f, 1.0f, 7.0f));
 	
-	GetSpectrum(musicPath);
+	FFTInitialize(musicPath);
 	soundEngine->play2D(musicPath.c_str(), true);
 	
     // Rendering loop: this code is executed at each frame
@@ -276,6 +272,8 @@ int main()
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		
+		FFTCompute();
 		
 		// Draw the GUI through ImGui
 		DrawGUI();
@@ -356,6 +354,7 @@ int main()
     // we delete the Shader Programs
     DeleteShaders();
 	
+	AubioReset(true);
 	// Delete irrKlang sound engine
 	soundEngine->drop();
 	
@@ -526,6 +525,16 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 }
 
+// Aubio Parameters
+aubio_source_t* aubioSource; // Aubio source, used to read a media file
+uint_t win_s = 512; // window size
+uint_t hop_s = win_s / 4; // hop size
+aubio_fft_t* fft; // Fast Fourier Transform struct
+uint_t samplerate = 0;
+fvec_t* fftin; // Input signal for FFT
+cvec_t* fftout; // FFT's spectrum output
+float samplesPerWindow;
+
 void DrawGUI()
 {
 	static bool fileDialog = false;
@@ -543,50 +552,45 @@ void DrawGUI()
 		ImGui::Text("Current Music: Default");
 
 	if(ImGui::Button("Restart Music")){
+		AubioReset(true);
+		FFTInitialize(musicPath);
 		PlayMusic(musicPath);
 	}
-	if(ImGui::Button("Change Music")){
-		soundEngine->stopAllSounds();
+	if(ImGui::Button("Change Music"))
 		fileDialog = true;
-	}
-	
+		
 	if(fileDialog){
 		if(ImGuiFileDialog::Instance()->FileDialog("Choose Music File", "", "../../../Music", "")){
 			if(ImGuiFileDialog::Instance()->IsOk == true){
-				fileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
-				musicPath = ImGuiFileDialog::Instance()->GetFilepathName();
-				
-				PlayMusic(musicPath);
+				string tempFileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
+				if(tempFileName != ""){
+					fileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
+					musicPath = ImGuiFileDialog::Instance()->GetFilepathName();
+					AubioReset(true);
+					FFTInitialize(musicPath);
+					PlayMusic(musicPath);
+				}
 			}
 			else{
-				PlayMusic(musicPath);
 			}
 			fileDialog = false;
 		}
 	}
-		
 	ImGui::End();
 	
 	ImGui::Begin("AubioUI");
 	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "FFT Bands");
-	ImGui::BeginChild("Scrolling");
-	for (int n = 0; n < 50; n++)
-		ImGui::Text("%04d: %d", n, samplerate);
-	ImGui::EndChild();
 	ImGui::End();
 	
-	ImGui::Begin("Grid Parameters");
+	ImGui::Begin("Environment Parameters");
 	ImGui::SliderFloat("GridSize", &gridSize, 0.1f, 5.0f);
-	ImGui::End();
-	
-	ImGui::Begin("RetroSun Parameters");
 	ImGui::SliderFloat("AnimationSpeed", &speed, 0.0f, 10.0f);
 	ImGui::SliderFloat("SunDepth", &sunDepth, -10.0f, 10.0f);
 	ImGui::SliderFloat("Size", &sunSize, 0.5f, 10.0f);
 	ImGui::End();
 }
 
-void GetSpectrum(string musicPath)
+void FFTInitialize(string musicPath)
 {
 	aubioSource = new_aubio_source(musicPath.c_str(), 0, hop_s);
 	if(!aubioSource){
@@ -595,6 +599,36 @@ void GetSpectrum(string musicPath)
 	}
 	
 	samplerate = aubio_source_get_samplerate(aubioSource);
+	samplesPerWindow = (float)samplerate / (float)win_s;
+	
+	fftin = new_fvec(win_s);
+	fftout = new_cvec(win_s);
+	fft = new_aubio_fft(win_s);
+	if(!fft)
+		AubioReset(false);
+}
+
+void FFTCompute()
+{
+	uint_t read = 0, n_frames = 0;
+	uint_t n_frames_expected = aubio_source_get_duration(aubioSource);
+	do{
+		aubio_source_do(aubioSource, fftin, &read);
+		n_frames += read;
+		aubio_fft_do(fft, fftin, fftout);
+	}while(read == hop_s);
+	
+	printf("WTF IS %d. Read %d frames (expected %d) at %dHz (%d blocks).\n", read, n_frames, n_frames_expected, samplerate, n_frames / hop_s);
+
+}
+
+void AubioReset(bool fftcheck)
+{
+	if(fftcheck)
+		del_aubio_fft(fft);
+	del_fvec(fftin);
+	del_cvec(fftout);
+	aubio_cleanup();
 }
 
 void PlayMusic(string musicPath)
