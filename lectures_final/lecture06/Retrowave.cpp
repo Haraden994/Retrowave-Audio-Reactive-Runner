@@ -90,7 +90,7 @@ void AubioReset(bool fftcheck);
 // Setup aubio for spectrum analysis using FFT
 void FFTInitialize(string musicPath);
 // Compute and extract Fast Fourier Transform
-void FFTCompute();
+void FFTCompute(GLfloat deltaTime);
 // Stop all the current audio reproductions and start a new one
 void PlayMusic(string musicPath);
 
@@ -112,6 +112,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 7.0f), GL_TRUE);
 // parameters for time calculation (for animations)
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
+GLfloat musicStartTime = 0.0f;
 
 // boolean to activate/deactivate wireframe rendering
 GLboolean wireframe = GL_FALSE;
@@ -127,7 +128,7 @@ GLfloat speed = 2.0f;
 string musicPath = "../../../Music/Prophecy.wav";
 GLfloat sunSize = 2.0f;
 GLfloat sunDepth = 0.0f;
-GLfloat gridSize = 1.0f;
+GLfloat gridSize = 0.2f;
 
 // texture unit for the cube map
 GLuint textureCube;
@@ -244,6 +245,8 @@ int main()
     // View matrix (=camera): position, view direction, camera "up" vector
     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 7.0f), glm::vec3(0.0f, 0.0f, -7.0f), glm::vec3(0.0f, 1.0f, 7.0f));
 	
+	// start music reproduction and processing
+	musicStartTime = glfwGetTime();
 	FFTInitialize(musicPath);
 	soundEngine->play2D(musicPath.c_str(), true);
 	
@@ -252,9 +255,15 @@ int main()
     {
         // we determine the time passed from the beginning
         // and we calculate time difference between current frame rendering and the previous one
-        GLfloat currentFrame = glfwGetTime();
+        GLfloat currentFrame = glfwGetTime() - musicStartTime;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+		
+				
+		FFTCompute(deltaTime);
+		
+		// Draw the GUI through ImGui
+		DrawGUI();
 
         // Check is an I/O event is happening
         glfwPollEvents();
@@ -272,11 +281,6 @@ int main()
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		
-		FFTCompute();
-		
-		// Draw the GUI through ImGui
-		DrawGUI();
 		
 		// we activate the cube map
         glActiveTexture(GL_TEXTURE0);
@@ -567,6 +571,8 @@ void DrawGUI()
 					fileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
 					musicPath = ImGuiFileDialog::Instance()->GetFilepathName();
 					AubioReset(true);
+					lastFrame = 0;
+					musicStartTime = glfwGetTime();
 					FFTInitialize(musicPath);
 					PlayMusic(musicPath);
 				}
@@ -579,7 +585,10 @@ void DrawGUI()
 	ImGui::End();
 	
 	ImGui::Begin("AubioUI");
-	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "FFT Bands");
+	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "FFT Samples");
+	for(int i = 0; i < fftout->length; i++){
+		ImGui::Text("Sample %03d: %f", i, (float)fftout->norm[i]);
+	}
 	ImGui::End();
 	
 	ImGui::Begin("Environment Parameters");
@@ -608,17 +617,24 @@ void FFTInitialize(string musicPath)
 		AubioReset(false);
 }
 
-void FFTCompute()
+int remainingFrames = 0;
+
+void FFTCompute(GLfloat deltaTime)
 {
-	uint_t read = 0, n_frames = 0;
-	uint_t n_frames_expected = aubio_source_get_duration(aubioSource);
-	do{
-		aubio_source_do(aubioSource, fftin, &read);
-		n_frames += read;
-		aubio_fft_do(fft, fftin, fftout);
-	}while(read == hop_s);
+	// Taking time and frame relationship into account in order to compute FFT in real time.
+	uint_t framesRead = 0;
+	int n_frames = 0;
+	int passedFrames = deltaTime * (int)samplerate - remainingFrames;
 	
-	printf("WTF IS %d. Read %d frames (expected %d) at %dHz (%d blocks).\n", read, n_frames, n_frames_expected, samplerate, n_frames / hop_s);
+	while(n_frames < passedFrames){
+		aubio_source_do(aubioSource, fftin, &framesRead);
+		n_frames += framesRead;
+		aubio_fft_do(fft, fftin, fftout);
+		if(framesRead != hop_s)
+			break;
+	}
+	remainingFrames = n_frames - passedFrames;
+	printf("Read %d frames at %dHz (%d blocks).\n", n_frames, samplerate, n_frames / hop_s);
 
 }
 

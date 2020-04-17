@@ -5,8 +5,15 @@
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
       <wxString Value="C:\Users\night\Desktop\RTGP\lectures_final\lecture06\Retrowave.cpp" Name="FileName"/>
-      <int Value="595" Name="FirstVisibleLine"/>
-      <int Value="611" Name="CurrentLine"/>
+      <int Value="593" Name="FirstVisibleLine"/>
+      <int Value="620" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="C:\Users\night\Desktop\RTGP\include\aubio\io\source.h" Name="FileName"/>
+      <int Value="71" Name="FirstVisibleLine"/>
+      <int Value="86" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
