@@ -91,6 +91,8 @@ void AubioReset(bool fftcheck);
 void FFTInitialize(string musicPath);
 // Compute and extract Fast Fourier Transform
 void FFTCompute(GLfloat deltaTime);
+// Collapse the win_s/2 frequency bands into 8 frequency bands
+void MakeFrequencyBands();
 // Stop all the current audio reproductions and start a new one
 void PlayMusic(string musicPath);
 
@@ -109,10 +111,11 @@ GLfloat spin_speed = 30.0f;
 // we create a camera. We pass the initial position as a paramenter to the constructor. The last boolean tells that we want a camera "anchored" to the ground
 Camera camera(glm::vec3(0.0f, 0.0f, 7.0f), GL_TRUE);
 
-// parameters for time calculation (for animations)
+// parameters for time calculation
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 GLfloat musicStartTime = 0.0f;
+int remainingFrames = 0;
 
 // boolean to activate/deactivate wireframe rendering
 GLboolean wireframe = GL_FALSE;
@@ -133,6 +136,8 @@ GLfloat gridSize = 0.2f;
 // texture unit for the cube map
 GLuint textureCube;
 
+// vector to store the frequency bands extracted by FFTCompute
+vector<float> frequencyBands;
 // Initialization of irrKlang for audio reproduction
 irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
 
@@ -220,7 +225,7 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 150");
 
-	Shader grid_shader("06_procedural_base.vert", "neonGrid.frag");
+	Shader grid_shader("fftBasedDisplacement.vert", "neonGrid.frag");
 	shaders.push_back(grid_shader);
 	Shader sun_shader("retrosun.vert", "retrosunSphere.frag");
 	shaders.push_back(sun_shader);
@@ -293,8 +298,17 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 		
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "deepbass"), frequencyBands[0]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "bass"), frequencyBands[1]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumbass"), frequencyBands[2]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "medium1"), frequencyBands[3]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "medium2"), frequencyBands[4]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumhigh"), frequencyBands[5]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "high"), frequencyBands[6]* 0.1);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "veryhigh"), frequencyBands[7]);
+		
 		glm::mat4 gridModelMatrix;
-		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, -1.0f, 0.0f));
+		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, -10.0f, 0.0f));
 		gridModelMatrix = glm::scale(gridModelMatrix, glm::vec3(gridSize, 1.0f, gridSize));
 		glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(gridModelMatrix));
 		
@@ -491,14 +505,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // If one of the WASD keys is pressed, the camera is moved accordingly (the code is in utils/camera.h)
 void apply_camera_movements()
 {
+	float speed = 5.0;
     if(keys[GLFW_KEY_W])
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        camera.ProcessKeyboard(FORWARD, deltaTime * speed);
     if(keys[GLFW_KEY_S])
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        camera.ProcessKeyboard(BACKWARD, deltaTime * speed);
     if(keys[GLFW_KEY_A])
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        camera.ProcessKeyboard(LEFT, deltaTime * speed);
     if(keys[GLFW_KEY_D])
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        camera.ProcessKeyboard(RIGHT, deltaTime * speed);
 }
 
 //////////////////////////////////////////
@@ -531,7 +546,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 // Aubio Parameters
 aubio_source_t* aubioSource; // Aubio source, used to read a media file
-uint_t win_s = 512; // window size
+uint_t win_s = 1024; // window size
 uint_t hop_s = win_s / 4; // hop size
 aubio_fft_t* fft; // Fast Fourier Transform struct
 uint_t samplerate = 0;
@@ -557,6 +572,9 @@ void DrawGUI()
 
 	if(ImGui::Button("Restart Music")){
 		AubioReset(true);
+		lastFrame = 0;
+		remainingFrames = 0;
+		musicStartTime = glfwGetTime();
 		FFTInitialize(musicPath);
 		PlayMusic(musicPath);
 	}
@@ -572,6 +590,7 @@ void DrawGUI()
 					musicPath = ImGuiFileDialog::Instance()->GetFilepathName();
 					AubioReset(true);
 					lastFrame = 0;
+					remainingFrames = 0;
 					musicStartTime = glfwGetTime();
 					FFTInitialize(musicPath);
 					PlayMusic(musicPath);
@@ -585,10 +604,16 @@ void DrawGUI()
 	ImGui::End();
 	
 	ImGui::Begin("AubioUI");
-	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "FFT Samples");
-	for(int i = 0; i < fftout->length; i++){
-		ImGui::Text("Sample %03d: %f", i, (float)fftout->norm[i]);
+	ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "Frequency Bands (8x)");
+	for(int i = 0; i < frequencyBands.size(); i++){
+		ImGui::Text("FBand %02d: %f", i, frequencyBands[i]);
 	}
+	ImGui::BeginChild("Scrolling");
+	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "FFT Frequency Samples");
+	for(int j = 0; j < fftout->length; j++){
+		ImGui::Text("Sample %03d: %f", j, (float)fftout->norm[j]);
+	}
+	ImGui::EndChild();
 	ImGui::End();
 	
 	ImGui::Begin("Environment Parameters");
@@ -613,11 +638,10 @@ void FFTInitialize(string musicPath)
 	fftin = new_fvec(win_s);
 	fftout = new_cvec(win_s);
 	fft = new_aubio_fft(win_s);
+	
 	if(!fft)
 		AubioReset(false);
 }
-
-int remainingFrames = 0;
 
 void FFTCompute(GLfloat deltaTime)
 {
@@ -626,16 +650,41 @@ void FFTCompute(GLfloat deltaTime)
 	int n_frames = 0;
 	int passedFrames = deltaTime * (int)samplerate - remainingFrames;
 	
+	frequencyBands.assign(8, 0.0);
+	
 	while(n_frames < passedFrames){
 		aubio_source_do(aubioSource, fftin, &framesRead);
 		n_frames += framesRead;
 		aubio_fft_do(fft, fftin, fftout);
+		
+		MakeFrequencyBands();
+		
 		if(framesRead != hop_s)
 			break;
 	}
 	remainingFrames = n_frames - passedFrames;
 	printf("Read %d frames at %dHz (%d blocks).\n", n_frames, samplerate, n_frames / hop_s);
 
+}
+
+void MakeFrequencyBands()
+{
+	int count = 0;
+	float frequency;
+	
+	for(int i = 0; i < 8; i++){
+		float average = 0;
+		int sampleCount = (int)pow(2, i) * 2;
+		if(i == 7)
+			sampleCount += 2;
+		for(int j = 0; j < sampleCount; j++){
+			average += fftout->norm[count] * (count + 1);
+			count++;
+		}
+		
+		average /= count;
+		frequencyBands[i] = average;
+	}
 }
 
 void AubioReset(bool fftcheck)
