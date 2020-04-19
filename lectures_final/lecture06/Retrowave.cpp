@@ -93,6 +93,8 @@ void FFTInitialize(string musicPath);
 void FFTCompute(GLfloat deltaTime);
 // Collapse the win_s/2 frequency bands into 8 frequency bands
 void MakeFrequencyBands();
+// Frequency bands normalization leading to a better manipulation inside the vertex shader
+void FrequencyBandsNormalize();
 // Stop all the current audio reproductions and start a new one
 void PlayMusic(string musicPath);
 
@@ -125,7 +127,8 @@ GLboolean mouseEnabled = GL_FALSE;
 vector<Shader> shaders;
 
 // Uniforms to be passed to shaders
-GLfloat speed = 2.0f;
+GLfloat sunAnimationSpeed = 2.0f;
+GLfloat gridScrollSpeed = 0.5f;
 
 // Variables
 string musicPath = "../../../Music/Prophecy.wav";
@@ -225,7 +228,7 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 150");
 
-	Shader grid_shader("fftBasedDisplacement.vert", "neonGrid.frag");
+	Shader grid_shader("FFTDisplacement.vert", "neonGrid.frag");
 	shaders.push_back(grid_shader);
 	Shader sun_shader("retrosun.vert", "retrosunSphere.frag");
 	shaders.push_back(sun_shader);
@@ -260,6 +263,7 @@ int main()
     {
         // we determine the time passed from the beginning
         // and we calculate time difference between current frame rendering and the previous one
+		GLfloat currentFrameNoMusic = glfwGetTime();
         GLfloat currentFrame = glfwGetTime() - musicStartTime;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -298,14 +302,16 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 		
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "deepbass"), frequencyBands[0]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "deepBass"), frequencyBands[0]);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "bass"), frequencyBands[1]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumbass"), frequencyBands[2]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "medium1"), frequencyBands[3]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "medium2"), frequencyBands[4]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumhigh"), frequencyBands[5]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "high"), frequencyBands[6]* 0.1);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "veryhigh"), frequencyBands[7]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumBass"), frequencyBands[2]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumLow"), frequencyBands[3]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "medium"), frequencyBands[4]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumHigh"), frequencyBands[5]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "high"), frequencyBands[6]);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "veryHigh"), frequencyBands[7]);
+		
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "time"), -currentFrameNoMusic * gridScrollSpeed);
 		
 		glm::mat4 gridModelMatrix;
 		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, -10.0f, 0.0f));
@@ -345,9 +351,7 @@ int main()
 		qSun_shader.Use();
 		
 		// uniforms are passed to the corresponding shader
-		GLint timerLocation = glGetUniformLocation(qSun_shader.Program, "u_time");
-			
-		glUniform1f(timerLocation, currentFrame * speed);
+		glUniform1f(glGetUniformLocation(qSun_shader.Program, "u_time"), currentFrameNoMusic * sunAnimationSpeed);
 		
 		// we pass projection and view matrices to the Shader Program
         glUniformMatrix4fv(glGetUniformLocation(qSun_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -618,7 +622,7 @@ void DrawGUI()
 	
 	ImGui::Begin("Environment Parameters");
 	ImGui::SliderFloat("GridSize", &gridSize, 0.1f, 5.0f);
-	ImGui::SliderFloat("AnimationSpeed", &speed, 0.0f, 10.0f);
+	ImGui::SliderFloat("AnimationSpeed", &sunAnimationSpeed, 0.0f, 10.0f);
 	ImGui::SliderFloat("SunDepth", &sunDepth, -10.0f, 10.0f);
 	ImGui::SliderFloat("Size", &sunSize, 0.5f, 10.0f);
 	ImGui::End();
@@ -658,6 +662,7 @@ void FFTCompute(GLfloat deltaTime)
 		aubio_fft_do(fft, fftin, fftout);
 		
 		MakeFrequencyBands();
+		FrequencyBandsNormalize();
 		
 		if(framesRead != hop_s)
 			break;
@@ -685,6 +690,15 @@ void MakeFrequencyBands()
 		average /= count;
 		frequencyBands[i] = average;
 	}
+}
+
+void FrequencyBandsNormalize()
+{
+	float sum = 0.0f;
+	for(int i = 0; i < frequencyBands.size(); i++)
+		sum += frequencyBands[i];
+	for(int i = 0; i < frequencyBands.size(); i++)
+		frequencyBands[i] /= sum;
 }
 
 void AubioReset(bool fftcheck)
