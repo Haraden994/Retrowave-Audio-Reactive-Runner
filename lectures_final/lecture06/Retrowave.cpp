@@ -621,9 +621,10 @@ void DrawGUI()
 	ImGui::End();
 	
 	ImGui::Begin("Environment Parameters");
-	ImGui::SliderFloat("GridSize", &gridSize, 0.1f, 5.0f);
-	ImGui::SliderFloat("AnimationSpeed", &sunAnimationSpeed, 0.0f, 10.0f);
-	ImGui::SliderFloat("SunDepth", &sunDepth, -10.0f, 10.0f);
+	ImGui::SliderFloat("Grid Size", &gridSize, 0.1f, 5.0f);
+	ImGui::SliderFloat("Grid Scroll Speed", &gridScrollSpeed, 0.1f, 2.0f);
+	ImGui::SliderFloat("Sun Animation Speed", &sunAnimationSpeed, 0.0f, 10.0f);
+	ImGui::SliderFloat("Sun Depth", &sunDepth, -10.0f, 10.0f);
 	ImGui::SliderFloat("Size", &sunSize, 0.5f, 10.0f);
 	ImGui::End();
 }
