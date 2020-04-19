@@ -17,15 +17,16 @@ uniform mat4 viewMatrix;
 // Projection matrix
 uniform mat4 projectionMatrix;
 
+uniform float frequencyBands[];
 // Uniforms storing values for the eight frequency bands
-uniform float deepBass;
+/*uniform float deepBass;
 uniform float bass;
 uniform float mediumBass;
 uniform float mediumLow;
 uniform float medium;
 uniform float mediumHigh;
 uniform float high;
-uniform float veryHigh;
+uniform float veryHigh;*/
 
 uniform float time;
 
@@ -108,28 +109,28 @@ float dPower = 30.0;
 // Displace vertices according to their V value, the grid is divided in eight zones, one for each Frequency Band.
 float displaceByFBands(){
     if(UV.y<=0.125){
-        return deepBass;
+        return frequencyBands[0];
     }
     if(UV.y<=0.25){
-        return bass;
+        return frequencyBands[1];
     }
     if(UV.y<=0.375){
-        return mediumBass;
+        return frequencyBands[2];
     }
     if(UV.y<=0.5){
-        return mediumLow;
+        return frequencyBands[3];
     }
     if(UV.y<=0.625){
-        return medium;
+        return frequencyBands[4];
     }
     if(UV.y<=0.75){
-        return mediumHigh;
+        return frequencyBands[5];
     }
     if(UV.y<=0.875){
-        return high;
+        return frequencyBands[6];
     }
 	else{
-		return veryHigh;
+		return frequencyBands[7];
 	}
 }
 

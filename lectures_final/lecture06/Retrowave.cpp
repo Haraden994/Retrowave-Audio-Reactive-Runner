@@ -91,10 +91,12 @@ void AubioReset(bool fftcheck);
 void FFTInitialize(string musicPath);
 // Compute and extract Fast Fourier Transform
 void FFTCompute(GLfloat deltaTime);
-// Collapse the win_s/2 frequency bands into 8 frequency bands
-void MakeFrequencyBands();
+// Merge the win_s/2 frequency bands into 8 frequency bands
+void MergeFrequencyBands();
 // Frequency bands normalization leading to a better manipulation inside the vertex shader
 void FrequencyBandsNormalize();
+// Through the use of a buffer we can avoid the grid's flickering
+void CreateBandsBuffer();
 // Stop all the current audio reproductions and start a new one
 void PlayMusic(string musicPath);
 
@@ -141,6 +143,9 @@ GLuint textureCube;
 
 // vector to store the frequency bands extracted by FFTCompute
 vector<float> frequencyBands;
+// vector used as Buffer in order to smooth the descending vertex displacement. We avoid the unnecessary flicker of the audio reactive grid.
+vector<float> bandsBuffer;
+vector<float> bufferDecrease;
 // Initialization of irrKlang for audio reproduction
 irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
 
@@ -302,14 +307,16 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 		
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "deepBass"), frequencyBands[0]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "bass"), frequencyBands[1]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumBass"), frequencyBands[2]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumLow"), frequencyBands[3]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "medium"), frequencyBands[4]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumHigh"), frequencyBands[5]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "high"), frequencyBands[6]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "veryHigh"), frequencyBands[7]);
+		glUniform1fv(glGetUniformLocation(grid_shader.Program, "frequencyBands"), bandsBuffer.size(), &bandsBuffer[0]);
+		
+//		glUniform1f(glGetUniformLocation(grid_shader.Program, "deepBass"), frequencyBands[0]);
+//		glUniform1f(glGetUniformLocation(grid_shader.Program, "bass"), frequencyBands[1]);
+//		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumBass"), frequencyBands[2]);
+//		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumLow"), frequencyBands[3]);
+//		glUniform1f(glGetUniformLocation(grid_shader.Program, "medium"), frequencyBands[4]);
+//		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumHigh"), frequencyBands[5]);
+//		glUniform1f(glGetUniformLocation(grid_shader.Program, "high"), frequencyBands[6]);
+//		glUniform1f(glGetUniformLocation(grid_shader.Program, "veryHigh"), frequencyBands[7]);
 		
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "time"), -currentFrameNoMusic * gridScrollSpeed);
 		
@@ -610,7 +617,7 @@ void DrawGUI()
 	ImGui::Begin("AubioUI");
 	ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "Frequency Bands (8x)");
 	for(int i = 0; i < frequencyBands.size(); i++){
-		ImGui::Text("FBand %02d: %f", i, frequencyBands[i]);
+		ImGui::Text("FBand %02d: %f", i, bandsBuffer[i]);
 	}
 	ImGui::BeginChild("Scrolling");
 	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "FFT Frequency Samples");
@@ -621,10 +628,12 @@ void DrawGUI()
 	ImGui::End();
 	
 	ImGui::Begin("Environment Parameters");
-	ImGui::SliderFloat("Grid Size", &gridSize, 0.1f, 5.0f);
-	ImGui::SliderFloat("Grid Scroll Speed", &gridScrollSpeed, 0.1f, 2.0f);
-	ImGui::SliderFloat("Sun Animation Speed", &sunAnimationSpeed, 0.0f, 10.0f);
-	ImGui::SliderFloat("Sun Depth", &sunDepth, -10.0f, 10.0f);
+	ImGui::TextColored(ImVec4(1.0, 0.0, 1.0, 1.0), "Neon Grid Parameters");
+	ImGui::SliderFloat("Grid Size", &gridSize, 0.1f, 1.0f);
+	ImGui::SliderFloat("Scroll Speed", &gridScrollSpeed, 0.1f, 2.0f);
+	ImGui::TextColored(ImVec4(1.0, 0.8, 0.0, 1.0), "Retro Sun Parameters");
+	ImGui::SliderFloat("Shader Animation Speed", &sunAnimationSpeed, 0.0f, 10.0f);
+	ImGui::SliderFloat("Depth", &sunDepth, -50.0f, 50.0f);
 	ImGui::SliderFloat("Size", &sunSize, 0.5f, 10.0f);
 	ImGui::End();
 }
@@ -644,6 +653,9 @@ void FFTInitialize(string musicPath)
 	fftout = new_cvec(win_s);
 	fft = new_aubio_fft(win_s);
 	
+	bandsBuffer.assign(8, 0.0);
+	bufferDecrease.assign(8, 0.0);
+	
 	if(!fft)
 		AubioReset(false);
 }
@@ -662,8 +674,9 @@ void FFTCompute(GLfloat deltaTime)
 		n_frames += framesRead;
 		aubio_fft_do(fft, fftin, fftout);
 		
-		MakeFrequencyBands();
+		MergeFrequencyBands();
 		FrequencyBandsNormalize();
+		CreateBandsBuffer();
 		
 		if(framesRead != hop_s)
 			break;
@@ -673,7 +686,7 @@ void FFTCompute(GLfloat deltaTime)
 
 }
 
-void MakeFrequencyBands()
+void MergeFrequencyBands()
 {
 	int count = 0;
 	float frequency;
@@ -693,6 +706,7 @@ void MakeFrequencyBands()
 	}
 }
 
+// Sum up all the frequency bands and divide each one by the sum in order to get the normalized frequency bands.
 void FrequencyBandsNormalize()
 {
 	float sum = 0.0f;
@@ -700,6 +714,22 @@ void FrequencyBandsNormalize()
 		sum += frequencyBands[i];
 	for(int i = 0; i < frequencyBands.size(); i++)
 		frequencyBands[i] /= sum;
+}
+
+// Smoothly descend if the next frequency band value in the buffer is lower than the actual one.
+// In case the next frequency is higher, the buffer will just spike up.
+void CreateBandsBuffer()
+{
+	for(int i = 0; i < 8; i++){
+		if(frequencyBands[i] > bandsBuffer[i]){
+			bandsBuffer[i] = frequencyBands[i];
+			bufferDecrease[i] = 0.00005f;
+		}
+		if(frequencyBands[i] < bandsBuffer[i]){
+			bandsBuffer[i] -= bufferDecrease[i];
+			bufferDecrease[i] *= 1.2f; // Buffer decrease is used in order to rapidly descend over time if frequencies in the buffer are always lower than the current
+		}
+	}
 }
 
 void AubioReset(bool fftcheck)
