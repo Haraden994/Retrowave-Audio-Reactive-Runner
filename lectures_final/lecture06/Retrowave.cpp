@@ -130,13 +130,16 @@ vector<Shader> shaders;
 
 // Uniforms to be passed to shaders
 GLfloat sunAnimationSpeed = 2.0f;
-GLfloat gridScrollSpeed = 0.5f;
+GLfloat sunSize = 2.0f;
+GLfloat sunDepth = 0.0f;
+GLfloat gridScrollSpeed = 0.3f;
+GLfloat gridSize = 0.2f;
+GLfloat gridNoiseZoom = 5.0;
+GLfloat gridDisplacementPower = 30.0;
 
 // Variables
 string musicPath = "../../../Music/Prophecy.wav";
-GLfloat sunSize = 2.0f;
-GLfloat sunDepth = 0.0f;
-GLfloat gridSize = 0.2f;
+float bufferDecreaseAmount = 0.00005;
 
 // texture unit for the cube map
 GLuint textureCube;
@@ -318,7 +321,10 @@ int main()
 //		glUniform1f(glGetUniformLocation(grid_shader.Program, "high"), frequencyBands[6]);
 //		glUniform1f(glGetUniformLocation(grid_shader.Program, "veryHigh"), frequencyBands[7]);
 		
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "time"), -currentFrameNoMusic * gridScrollSpeed);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "time"),  currentFrameNoMusic);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "scrollSpeed"),  gridScrollSpeed);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "zoom"),  gridNoiseZoom);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "dPower"),  gridDisplacementPower);
 		
 		glm::mat4 gridModelMatrix;
 		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, -10.0f, 0.0f));
@@ -568,6 +574,7 @@ float samplesPerWindow;
 void DrawGUI()
 {
 	static bool fileDialog = false;
+	static bool showAubioUI = false;
 	static string fileName = "";
 	
 	ImGui_ImplOpenGL3_NewFrame();
@@ -575,6 +582,8 @@ void DrawGUI()
 	ImGui::NewFrame();
 	
 	ImGui::Begin("GeneralUI");
+	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "Press ALT to enable/disable cursor.");
+	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "WASD for movement.");
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	if(fileName.size() > 0)
 		ImGui::Text("Current Music: %s", fileName.c_str());
@@ -589,6 +598,8 @@ void DrawGUI()
 		FFTInitialize(musicPath);
 		PlayMusic(musicPath);
 	}
+	ImGui::SameLine();
+	
 	if(ImGui::Button("Change Music"))
 		fileDialog = true;
 		
@@ -612,25 +623,39 @@ void DrawGUI()
 			fileDialog = false;
 		}
 	}
+	ImGui::SameLine();
+	
+	if(ImGui::Button("Open/Close Aubio UI")){
+		if(showAubioUI)
+			showAubioUI = false;
+		else
+			showAubioUI = true;
+	}
+	ImGui::SameLine();
 	ImGui::End();
 	
-	ImGui::Begin("AubioUI");
-	ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "Frequency Bands (8x)");
-	for(int i = 0; i < frequencyBands.size(); i++){
-		ImGui::Text("FBand %02d: %f", i, bandsBuffer[i]);
+	if(showAubioUI){
+		ImGui::Begin("AubioUI");
+		ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "Frequency Bands (8x)");
+		for(int i = 0; i < frequencyBands.size(); i++){
+			ImGui::Text("FBand %02d: %f", i, bandsBuffer[i]);
+		}
+		ImGui::BeginChild("Scrolling");
+		ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "FFT Frequency Samples");
+		for(int j = 0; j < fftout->length; j++){
+			ImGui::Text("Sample %03d: %f", j, (float)fftout->norm[j]);
+		}
+		ImGui::EndChild();
+		ImGui::End();
 	}
-	ImGui::BeginChild("Scrolling");
-	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "FFT Frequency Samples");
-	for(int j = 0; j < fftout->length; j++){
-		ImGui::Text("Sample %03d: %f", j, (float)fftout->norm[j]);
-	}
-	ImGui::EndChild();
-	ImGui::End();
 	
 	ImGui::Begin("Environment Parameters");
 	ImGui::TextColored(ImVec4(1.0, 0.0, 1.0, 1.0), "Neon Grid Parameters");
 	ImGui::SliderFloat("Grid Size", &gridSize, 0.1f, 1.0f);
-	ImGui::SliderFloat("Scroll Speed", &gridScrollSpeed, 0.1f, 2.0f);
+	ImGui::SliderFloat("Scroll Speed", &gridScrollSpeed, 0.05f, 1.0f);
+	ImGui::SliderFloat("Noise Zoom", &gridNoiseZoom, 0.1f, 10.0f);
+	ImGui::SliderFloat("Displacement Power", &gridDisplacementPower, 5.0f, 60.0f);
+	ImGui::InputFloat("Buffer Decrease Amount", &bufferDecreaseAmount, 0.000001f, 0.0001f, "%.6f");
 	ImGui::TextColored(ImVec4(1.0, 0.8, 0.0, 1.0), "Retro Sun Parameters");
 	ImGui::SliderFloat("Shader Animation Speed", &sunAnimationSpeed, 0.0f, 10.0f);
 	ImGui::SliderFloat("Depth", &sunDepth, -50.0f, 50.0f);
@@ -723,7 +748,7 @@ void CreateBandsBuffer()
 	for(int i = 0; i < 8; i++){
 		if(frequencyBands[i] > bandsBuffer[i]){
 			bandsBuffer[i] = frequencyBands[i];
-			bufferDecrease[i] = 0.00005f;
+			bufferDecrease[i] = abs(bufferDecreaseAmount);
 		}
 		if(frequencyBands[i] < bandsBuffer[i]){
 			bandsBuffer[i] -= bufferDecrease[i];

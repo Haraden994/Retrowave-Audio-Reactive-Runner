@@ -29,6 +29,9 @@ uniform float high;
 uniform float veryHigh;*/
 
 uniform float time;
+uniform float scrollSpeed;
+uniform float zoom;
+uniform float dPower;
 
 // Some useful functions
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -104,42 +107,39 @@ float snoise(vec2 v) {
     return 130.0 * dot(m, g);
 }
 
-float dPower = 30.0;
-
 // Displace vertices according to their V value, the grid is divided in eight zones, one for each Frequency Band.
 float displaceByFBands(){
-    if(UV.y<=0.125){
-        return frequencyBands[0];
+    if(UV.y <= 0.125){
+        return mix(frequencyBands[0], frequencyBands[1], UV.y / 0.125);
     }
-    if(UV.y<=0.25){
-        return frequencyBands[1];
+    if(UV.y <= 0.25){
+        return mix(frequencyBands[1], frequencyBands[2], (UV.y - 0.125) / 0.125);
     }
-    if(UV.y<=0.375){
-        return frequencyBands[2];
+    if(UV.y <= 0.375){
+        return mix(frequencyBands[2], frequencyBands[3], (UV.y - 0.25) / 0.125);
     }
-    if(UV.y<=0.5){
-        return frequencyBands[3];
+    if(UV.y <= 0.5){
+        return mix(frequencyBands[3], frequencyBands[4], (UV.y - 0.375) / 0.125);
     }
-    if(UV.y<=0.625){
-        return frequencyBands[4];
+    if(UV.y <= 0.625){
+        return mix(frequencyBands[4], frequencyBands[5], (UV.y - 0.5) / 0.125);
     }
-    if(UV.y<=0.75){
-        return frequencyBands[5];
+    if(UV.y <= 0.75){
+        return mix(frequencyBands[5], frequencyBands[6], (UV.y - 0.625) / 0.125);
     }
-    if(UV.y<=0.875){
-        return frequencyBands[6];
+    if(UV.y <= 0.875){
+        return mix(frequencyBands[6], frequencyBands[7], (UV.y - 0.75) / 0.125);
     }
-	else{
+	if(UV.y <= 1.0){
 		return frequencyBands[7];
 	}
 }
 
 void main(){
-	float zoom = 5.0;
 	interp_UV = UV;
 	// UV translation for grid movement illusion
 	vec2 translate = vec2(0.0, time);
-    interp_UV += translate*0.2;
+    interp_UV -= translate*scrollSpeed;
 	// The amount of zoom applied to the UV coordinates is used to "zoom" in/out the noise
 	vec2 noisePos = vec2(interp_UV * zoom);
 	float noised = snoise(noisePos);
