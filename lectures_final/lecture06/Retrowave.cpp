@@ -138,7 +138,7 @@ GLfloat gridNoiseZoom = 5.0;
 GLfloat gridDisplacementPower = 30.0;
 
 // Variables
-string musicPath = "../../../Music/Prophecy.wav";
+string musicPath = "../../../Music/SneakyDriver_KatanaZeroOST.wav";
 float bufferDecreaseAmount = 0.00005;
 
 // texture unit for the cube map
@@ -588,7 +588,7 @@ void DrawGUI()
 	if(fileName.size() > 0)
 		ImGui::Text("Current Music: %s", fileName.c_str());
 	else
-		ImGui::Text("Current Music: Default");
+		ImGui::Text("Current Music: SneakyDriver_KatanaZeroOST.wav");
 
 	if(ImGui::Button("Restart Music")){
 		AubioReset(true);
