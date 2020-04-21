@@ -5,15 +5,15 @@
 ## Debug
 ProjectName            :=Retrowave
 ConfigurationName      :=Debug
-WorkspacePath          :=C:/Users/night/Desktop/RTGP
-ProjectPath            :=C:/Users/night/Desktop/RTGP/lectures_final/lecture06
+WorkspacePath          :=C:/Users/andre/Desktop/RTGP
+ProjectPath            :=C:/Users/andre/Desktop/RTGP/lectures_final/lecture06
 IntermediateDirectory  :=./Debug
 OutDir                 := $(IntermediateDirectory)
 CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
-User                   :=night
-Date                   :=20/04/2020
+User                   :=andre
+Date                   :=21/04/2020
 CodeLitePath           :="C:/Program Files/CodeLite"
 LinkerName             :=C:/MinGW/bin/g++.exe
 SharedObjectLinkerName :=C:/MinGW/bin/g++.exe -shared -fPIC
@@ -62,7 +62,7 @@ AS       := C:/MinGW/bin/as.exe
 ## User defined environment variables
 ##
 CodeLiteDir:=C:\Program Files\CodeLite
-Objects0=$(IntermediateDirectory)/imgui_impl_glfw.cpp$(ObjectSuffix) $(IntermediateDirectory)/ImGuiFileDialog.cpp$(ObjectSuffix) $(IntermediateDirectory)/imgui_demo.cpp$(ObjectSuffix) $(IntermediateDirectory)/imgui_draw.cpp$(ObjectSuffix) $(IntermediateDirectory)/imgui.cpp$(ObjectSuffix) $(IntermediateDirectory)/imgui_impl_opengl3.cpp$(ObjectSuffix) $(IntermediateDirectory)/imgui_widgets.cpp$(ObjectSuffix) $(IntermediateDirectory)/Retrowave.cpp$(ObjectSuffix) $(IntermediateDirectory)/up_up_include_glad_glad.c$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/up_up_include_glad_glad.c$(ObjectSuffix) $(IntermediateDirectory)/imgui.cpp$(ObjectSuffix) $(IntermediateDirectory)/imgui_draw.cpp$(ObjectSuffix) $(IntermediateDirectory)/Retrowave.cpp$(ObjectSuffix) $(IntermediateDirectory)/imgui_impl_glfw.cpp$(ObjectSuffix) $(IntermediateDirectory)/imgui_widgets.cpp$(ObjectSuffix) $(IntermediateDirectory)/imgui_impl_opengl3.cpp$(ObjectSuffix) $(IntermediateDirectory)/ImGuiFileDialog.cpp$(ObjectSuffix) $(IntermediateDirectory)/imgui_demo.cpp$(ObjectSuffix) 
 
 
 
@@ -100,59 +100,77 @@ PreBuild:
 ##
 ## Objects
 ##
-$(IntermediateDirectory)/imgui_impl_glfw.cpp$(ObjectSuffix): imgui_impl_glfw.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui_impl_glfw.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui_impl_glfw.cpp$(DependSuffix) -MM imgui_impl_glfw.cpp
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/night/Desktop/RTGP/lectures_final/lecture06/imgui_impl_glfw.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui_impl_glfw.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/imgui_impl_glfw.cpp$(PreprocessSuffix): imgui_impl_glfw.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui_impl_glfw.cpp$(PreprocessSuffix) imgui_impl_glfw.cpp
+$(IntermediateDirectory)/up_up_include_glad_glad.c$(ObjectSuffix): ../../include/glad/glad.c $(IntermediateDirectory)/up_up_include_glad_glad.c$(DependSuffix)
+	$(CC) $(SourceSwitch) "C:/Users/andre/Desktop/RTGP/include/glad/glad.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/up_up_include_glad_glad.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/up_up_include_glad_glad.c$(DependSuffix): ../../include/glad/glad.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/up_up_include_glad_glad.c$(ObjectSuffix) -MF$(IntermediateDirectory)/up_up_include_glad_glad.c$(DependSuffix) -MM ../../include/glad/glad.c
 
-$(IntermediateDirectory)/ImGuiFileDialog.cpp$(ObjectSuffix): ImGuiFileDialog.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/ImGuiFileDialog.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/ImGuiFileDialog.cpp$(DependSuffix) -MM ImGuiFileDialog.cpp
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/night/Desktop/RTGP/lectures_final/lecture06/ImGuiFileDialog.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/ImGuiFileDialog.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/ImGuiFileDialog.cpp$(PreprocessSuffix): ImGuiFileDialog.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/ImGuiFileDialog.cpp$(PreprocessSuffix) ImGuiFileDialog.cpp
+$(IntermediateDirectory)/up_up_include_glad_glad.c$(PreprocessSuffix): ../../include/glad/glad.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/up_up_include_glad_glad.c$(PreprocessSuffix) ../../include/glad/glad.c
 
-$(IntermediateDirectory)/imgui_demo.cpp$(ObjectSuffix): imgui_demo.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui_demo.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui_demo.cpp$(DependSuffix) -MM imgui_demo.cpp
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/night/Desktop/RTGP/lectures_final/lecture06/imgui_demo.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui_demo.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/imgui_demo.cpp$(PreprocessSuffix): imgui_demo.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui_demo.cpp$(PreprocessSuffix) imgui_demo.cpp
-
-$(IntermediateDirectory)/imgui_draw.cpp$(ObjectSuffix): imgui_draw.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui_draw.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui_draw.cpp$(DependSuffix) -MM imgui_draw.cpp
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/night/Desktop/RTGP/lectures_final/lecture06/imgui_draw.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui_draw.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/imgui_draw.cpp$(PreprocessSuffix): imgui_draw.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui_draw.cpp$(PreprocessSuffix) imgui_draw.cpp
-
-$(IntermediateDirectory)/imgui.cpp$(ObjectSuffix): imgui.cpp
+$(IntermediateDirectory)/imgui.cpp$(ObjectSuffix): imgui.cpp $(IntermediateDirectory)/imgui.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/andre/Desktop/RTGP/lectures_final/lecture06/imgui.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/imgui.cpp$(DependSuffix): imgui.cpp
 	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui.cpp$(DependSuffix) -MM imgui.cpp
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/night/Desktop/RTGP/lectures_final/lecture06/imgui.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui.cpp$(ObjectSuffix) $(IncludePath)
+
 $(IntermediateDirectory)/imgui.cpp$(PreprocessSuffix): imgui.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui.cpp$(PreprocessSuffix) imgui.cpp
 
-$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(ObjectSuffix): imgui_impl_opengl3.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(DependSuffix) -MM imgui_impl_opengl3.cpp
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/night/Desktop/RTGP/lectures_final/lecture06/imgui_impl_opengl3.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(PreprocessSuffix): imgui_impl_opengl3.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui_impl_opengl3.cpp$(PreprocessSuffix) imgui_impl_opengl3.cpp
+$(IntermediateDirectory)/imgui_draw.cpp$(ObjectSuffix): imgui_draw.cpp $(IntermediateDirectory)/imgui_draw.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/andre/Desktop/RTGP/lectures_final/lecture06/imgui_draw.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui_draw.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/imgui_draw.cpp$(DependSuffix): imgui_draw.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui_draw.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui_draw.cpp$(DependSuffix) -MM imgui_draw.cpp
 
-$(IntermediateDirectory)/imgui_widgets.cpp$(ObjectSuffix): imgui_widgets.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui_widgets.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui_widgets.cpp$(DependSuffix) -MM imgui_widgets.cpp
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/night/Desktop/RTGP/lectures_final/lecture06/imgui_widgets.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui_widgets.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/imgui_widgets.cpp$(PreprocessSuffix): imgui_widgets.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui_widgets.cpp$(PreprocessSuffix) imgui_widgets.cpp
+$(IntermediateDirectory)/imgui_draw.cpp$(PreprocessSuffix): imgui_draw.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui_draw.cpp$(PreprocessSuffix) imgui_draw.cpp
 
-$(IntermediateDirectory)/Retrowave.cpp$(ObjectSuffix): Retrowave.cpp
+$(IntermediateDirectory)/Retrowave.cpp$(ObjectSuffix): Retrowave.cpp $(IntermediateDirectory)/Retrowave.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/andre/Desktop/RTGP/lectures_final/lecture06/Retrowave.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Retrowave.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/Retrowave.cpp$(DependSuffix): Retrowave.cpp
 	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/Retrowave.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/Retrowave.cpp$(DependSuffix) -MM Retrowave.cpp
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/night/Desktop/RTGP/lectures_final/lecture06/Retrowave.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Retrowave.cpp$(ObjectSuffix) $(IncludePath)
+
 $(IntermediateDirectory)/Retrowave.cpp$(PreprocessSuffix): Retrowave.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/Retrowave.cpp$(PreprocessSuffix) Retrowave.cpp
 
-$(IntermediateDirectory)/up_up_include_glad_glad.c$(ObjectSuffix): ../../include/glad/glad.c
-	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/up_up_include_glad_glad.c$(ObjectSuffix) -MF$(IntermediateDirectory)/up_up_include_glad_glad.c$(DependSuffix) -MM ../../include/glad/glad.c
-	$(CC) $(SourceSwitch) "C:/Users/night/Desktop/RTGP/include/glad/glad.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/up_up_include_glad_glad.c$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/up_up_include_glad_glad.c$(PreprocessSuffix): ../../include/glad/glad.c
-	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/up_up_include_glad_glad.c$(PreprocessSuffix) ../../include/glad/glad.c
+$(IntermediateDirectory)/imgui_impl_glfw.cpp$(ObjectSuffix): imgui_impl_glfw.cpp $(IntermediateDirectory)/imgui_impl_glfw.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/andre/Desktop/RTGP/lectures_final/lecture06/imgui_impl_glfw.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui_impl_glfw.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/imgui_impl_glfw.cpp$(DependSuffix): imgui_impl_glfw.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui_impl_glfw.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui_impl_glfw.cpp$(DependSuffix) -MM imgui_impl_glfw.cpp
+
+$(IntermediateDirectory)/imgui_impl_glfw.cpp$(PreprocessSuffix): imgui_impl_glfw.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui_impl_glfw.cpp$(PreprocessSuffix) imgui_impl_glfw.cpp
+
+$(IntermediateDirectory)/imgui_widgets.cpp$(ObjectSuffix): imgui_widgets.cpp $(IntermediateDirectory)/imgui_widgets.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/andre/Desktop/RTGP/lectures_final/lecture06/imgui_widgets.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui_widgets.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/imgui_widgets.cpp$(DependSuffix): imgui_widgets.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui_widgets.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui_widgets.cpp$(DependSuffix) -MM imgui_widgets.cpp
+
+$(IntermediateDirectory)/imgui_widgets.cpp$(PreprocessSuffix): imgui_widgets.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui_widgets.cpp$(PreprocessSuffix) imgui_widgets.cpp
+
+$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(ObjectSuffix): imgui_impl_opengl3.cpp $(IntermediateDirectory)/imgui_impl_opengl3.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/andre/Desktop/RTGP/lectures_final/lecture06/imgui_impl_opengl3.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(DependSuffix): imgui_impl_opengl3.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(DependSuffix) -MM imgui_impl_opengl3.cpp
+
+$(IntermediateDirectory)/imgui_impl_opengl3.cpp$(PreprocessSuffix): imgui_impl_opengl3.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui_impl_opengl3.cpp$(PreprocessSuffix) imgui_impl_opengl3.cpp
+
+$(IntermediateDirectory)/ImGuiFileDialog.cpp$(ObjectSuffix): ImGuiFileDialog.cpp $(IntermediateDirectory)/ImGuiFileDialog.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/andre/Desktop/RTGP/lectures_final/lecture06/ImGuiFileDialog.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/ImGuiFileDialog.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/ImGuiFileDialog.cpp$(DependSuffix): ImGuiFileDialog.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/ImGuiFileDialog.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/ImGuiFileDialog.cpp$(DependSuffix) -MM ImGuiFileDialog.cpp
+
+$(IntermediateDirectory)/ImGuiFileDialog.cpp$(PreprocessSuffix): ImGuiFileDialog.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/ImGuiFileDialog.cpp$(PreprocessSuffix) ImGuiFileDialog.cpp
+
+$(IntermediateDirectory)/imgui_demo.cpp$(ObjectSuffix): imgui_demo.cpp $(IntermediateDirectory)/imgui_demo.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/andre/Desktop/RTGP/lectures_final/lecture06/imgui_demo.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/imgui_demo.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/imgui_demo.cpp$(DependSuffix): imgui_demo.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/imgui_demo.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/imgui_demo.cpp$(DependSuffix) -MM imgui_demo.cpp
+
+$(IntermediateDirectory)/imgui_demo.cpp$(PreprocessSuffix): imgui_demo.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/imgui_demo.cpp$(PreprocessSuffix) imgui_demo.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

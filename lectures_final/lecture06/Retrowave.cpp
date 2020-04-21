@@ -132,10 +132,12 @@ vector<Shader> shaders;
 GLfloat sunAnimationSpeed = 2.0f;
 GLfloat sunSize = 2.0f;
 GLfloat sunDepth = 0.0f;
-GLfloat gridScrollSpeed = 0.3f;
+GLfloat gridScrollSpeed = 0.15f;
 GLfloat gridSize = 0.2f;
-GLfloat gridNoiseZoom = 5.0;
-GLfloat gridDisplacementPower = 30.0;
+GLfloat gridNoiseZoom = 5.0f;
+GLfloat gridDisplacementPower = 30.0f;
+GLfloat streetSize = 0.04f;
+GLfloat fadeAfterStreet = 0.2f;
 
 // Variables
 string musicPath = "../../../Music/SneakyDriver_KatanaZeroOST.wav";
@@ -325,6 +327,8 @@ int main()
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "scrollSpeed"),  gridScrollSpeed);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "zoom"),  gridNoiseZoom);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "dPower"),  gridDisplacementPower);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "streetSize"),  streetSize);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "fade"),  fadeAfterStreet);
 		
 		glm::mat4 gridModelMatrix;
 		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, -10.0f, 0.0f));
@@ -655,6 +659,8 @@ void DrawGUI()
 	ImGui::SliderFloat("Scroll Speed", &gridScrollSpeed, 0.05f, 1.0f);
 	ImGui::SliderFloat("Noise Zoom", &gridNoiseZoom, 0.1f, 10.0f);
 	ImGui::SliderFloat("Displacement Power", &gridDisplacementPower, 5.0f, 60.0f);
+	ImGui::InputFloat("Street Size", &streetSize, 0.01f, 0.1f, "%.3f");
+	ImGui::InputFloat("Fade After Street", &fadeAfterStreet, 0.01f, 0.1f, "%.3f");
 	ImGui::InputFloat("Buffer Decrease Amount", &bufferDecreaseAmount, 0.000001f, 0.0001f, "%.6f");
 	ImGui::TextColored(ImVec4(1.0, 0.8, 0.0, 1.0), "Retro Sun Parameters");
 	ImGui::SliderFloat("Shader Animation Speed", &sunAnimationSpeed, 0.0f, 10.0f);

@@ -32,6 +32,8 @@ uniform float time;
 uniform float scrollSpeed;
 uniform float zoom;
 uniform float dPower;
+uniform float streetSize;
+uniform float fade;
 
 // Some useful functions
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -108,7 +110,7 @@ float snoise(vec2 v) {
 }
 
 // Displace vertices according to their V value, the grid is divided in eight zones, one for each Frequency Band.
-float displaceByFBands(){
+float DisplaceByFBands(){
     if(UV.y <= 0.125){
         return mix(frequencyBands[0], frequencyBands[1], UV.y / 0.125);
     }
@@ -139,14 +141,17 @@ void main(){
 	interp_UV = UV;
 	// UV translation for grid movement illusion
 	vec2 translate = vec2(0.0, time);
-    interp_UV -= translate*scrollSpeed;
+    interp_UV -= translate * scrollSpeed;
 	// The amount of zoom applied to the UV coordinates is used to "zoom" in/out the noise
 	vec2 noisePos = vec2(interp_UV * zoom);
 	float noised = snoise(noisePos);
 	
-	float displacement = (noised * displaceByFBands()) * dPower;
+	noised *= 1.0 - (smoothstep(0.5 - streetSize - fade, 0.5 - streetSize, UV.x) - smoothstep(0.5 + streetSize, 0.5 + streetSize + fade, UV.x));
+
 	
-	vec3 displacedPosition = position + displacement*normal;
+	float displacement = (noised * DisplaceByFBands()) * dPower;
+	
+	vec3 displacedPosition = position + displacement * normal;
 	
 	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(displacedPosition, 1.0f);
 }
