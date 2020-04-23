@@ -125,23 +125,38 @@ int remainingFrames = 0;
 GLboolean wireframe = GL_FALSE;
 GLboolean mouseEnabled = GL_FALSE;
 
-// a vector for all the Shader Programs used and swapped in the application
+// a vector for all the Shader Programs used in the application
 vector<Shader> shaders;
 
 // Uniforms to be passed to shaders
 GLfloat sunAnimationSpeed = 2.0f;
 GLfloat sunSize = 2.0f;
-GLfloat sunDepth = 0.0f;
 GLfloat gridScrollSpeed = 0.15f;
 GLfloat gridSize = 0.2f;
 GLfloat gridNoiseZoom = 5.0f;
 GLfloat gridDisplacementPower = 30.0f;
 GLfloat streetSize = 0.04f;
 GLfloat fadeAfterStreet = 0.2f;
+// uniforms for light calculations
+GLfloat diffuseColor[] = {0.0f, 1.0f, 1.0f};
+GLfloat specularColor[] = {1.0f, 1.0f, 1.0f};
+GLfloat ambientColor[] = {1.0f, 0.0f, 1.0f};
+// diffuse, specular and ambient weights for Blinn-Phong lighting shader
+GLfloat diffuse = 0.6f;
+GLfloat specular = 0.2f;
+GLfloat ambient = 0.6f;
+// attenuation parameters
+GLfloat constant = 1.0f;
+GLfloat linear = 0.02f;
+GLfloat quadratic = 0.001f;
+// shininess coefficient
+GLfloat shininess = 25.0f;
 
 // Variables
 string musicPath = "../../../Music/SneakyDriver_KatanaZeroOST.wav";
 float bufferDecreaseAmount = 0.00005;
+float sunPosition[] = {0.0f, 0.0f, 0.0f};
+glm::vec3 lightPosition = glm::vec3(sunPosition[0], sunPosition[1], sunPosition[2]);
 
 // texture unit for the cube map
 GLuint textureCube;
@@ -277,8 +292,7 @@ int main()
         GLfloat currentFrame = glfwGetTime() - musicStartTime;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-		
-				
+
 		FFTCompute(deltaTime);
 		
 		// Draw the GUI through ImGui
@@ -312,28 +326,35 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 		
+		// animation and music uniforms
 		glUniform1fv(glGetUniformLocation(grid_shader.Program, "frequencyBands"), bandsBuffer.size(), &bandsBuffer[0]);
-		
-//		glUniform1f(glGetUniformLocation(grid_shader.Program, "deepBass"), frequencyBands[0]);
-//		glUniform1f(glGetUniformLocation(grid_shader.Program, "bass"), frequencyBands[1]);
-//		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumBass"), frequencyBands[2]);
-//		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumLow"), frequencyBands[3]);
-//		glUniform1f(glGetUniformLocation(grid_shader.Program, "medium"), frequencyBands[4]);
-//		glUniform1f(glGetUniformLocation(grid_shader.Program, "mediumHigh"), frequencyBands[5]);
-//		glUniform1f(glGetUniformLocation(grid_shader.Program, "high"), frequencyBands[6]);
-//		glUniform1f(glGetUniformLocation(grid_shader.Program, "veryHigh"), frequencyBands[7]);
-		
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "time"),  currentFrameNoMusic);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "scrollSpeed"),  gridScrollSpeed);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "zoom"),  gridNoiseZoom);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "dPower"),  gridDisplacementPower);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "streetSize"),  streetSize);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "fade"),  fadeAfterStreet);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "time"), currentFrameNoMusic);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "scrollSpeed"), gridScrollSpeed);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "zoom"), gridNoiseZoom);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "dPower"), gridDisplacementPower);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "streetSize"), streetSize);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "fade"), fadeAfterStreet);
+		// lighting uniforms
+		glUniform3fv(glGetUniformLocation(grid_shader.Program, "pointLightPosition"), 1, glm::value_ptr(lightPosition));
+		glUniform3fv(glGetUniformLocation(grid_shader.Program, "diffuseColor"), 1, diffuseColor);
+		glUniform3fv(glGetUniformLocation(grid_shader.Program, "specularColor"), 1, specularColor);
+		glUniform3fv(glGetUniformLocation(grid_shader.Program, "ambientColor"), 1, ambientColor);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "diffuse"), diffuse);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "specular"), specular);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "ambient"), ambient);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "constant"), constant);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "linear"), linear);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "quadratic"), quadratic);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "shininess"), shininess);
 		
 		glm::mat4 gridModelMatrix;
+		glm::mat3 gridNormalMatrix;
 		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, -10.0f, 0.0f));
 		gridModelMatrix = glm::scale(gridModelMatrix, glm::vec3(gridSize, 1.0f, gridSize));
+		// not considering translations on normal matrix, useful for lighting calculations
+		gridNormalMatrix = glm::inverseTranspose(glm::mat3(view * gridModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(gridModelMatrix));
+		glUniformMatrix3fv(glGetUniformLocation(grid_shader.Program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(gridNormalMatrix));
 		
 		gridModel.Draw(grid_shader);
 		
@@ -376,7 +397,7 @@ int main()
 		
 		glm::mat4 quadModelMatrix;
 		
-		quadModelMatrix = glm::translate(quadModelMatrix, glm::vec3(0.0f, 5.0f, sunDepth));
+		quadModelMatrix = glm::translate(quadModelMatrix, glm::vec3(sunPosition[0], sunPosition[1], sunPosition[2]));
 		quadModelMatrix = glm::rotate(quadModelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         quadModelMatrix = glm::scale(quadModelMatrix, glm::vec3(sunSize, 1.0f, sunSize));
         glUniformMatrix4fv(glGetUniformLocation(qSun_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(quadModelMatrix));
@@ -656,7 +677,7 @@ void DrawGUI()
 	ImGui::Begin("Environment Parameters");
 	ImGui::TextColored(ImVec4(1.0, 0.0, 1.0, 1.0), "Neon Grid Parameters");
 	ImGui::SliderFloat("Grid Size", &gridSize, 0.1f, 1.0f);
-	ImGui::SliderFloat("Scroll Speed", &gridScrollSpeed, 0.05f, 1.0f);
+	ImGui::SliderFloat("Scroll Speed", &gridScrollSpeed, 0.0f, 1.0f);
 	ImGui::SliderFloat("Noise Zoom", &gridNoiseZoom, 0.1f, 10.0f);
 	ImGui::SliderFloat("Displacement Power", &gridDisplacementPower, 5.0f, 60.0f);
 	ImGui::InputFloat("Street Size", &streetSize, 0.01f, 0.1f, "%.3f");
@@ -664,8 +685,20 @@ void DrawGUI()
 	ImGui::InputFloat("Buffer Decrease Amount", &bufferDecreaseAmount, 0.000001f, 0.0001f, "%.6f");
 	ImGui::TextColored(ImVec4(1.0, 0.8, 0.0, 1.0), "Retro Sun Parameters");
 	ImGui::SliderFloat("Shader Animation Speed", &sunAnimationSpeed, 0.0f, 10.0f);
-	ImGui::SliderFloat("Depth", &sunDepth, -50.0f, 50.0f);
+	ImGui::SliderFloat3("Sun Position", sunPosition, -50.0f, 50.0f);
+	lightPosition = glm::vec3(sunPosition[0], sunPosition[1], sunPosition[2]);
 	ImGui::SliderFloat("Size", &sunSize, 0.5f, 10.0f);
+	ImGui::Text("Sun Light Parameters");
+	ImGui::ColorEdit3("Diffuse Color", (float*)diffuseColor);
+	ImGui::InputFloat("Diffuse Weight", &diffuse, 0.01f, 0.1f);
+	ImGui::ColorEdit3("Specular Color", (float*)specularColor);
+	ImGui::InputFloat("Specular Weight", &specular, 0.01f, 0.1f);
+	ImGui::ColorEdit3("Ambient Color", (float*)ambientColor);
+	ImGui::InputFloat("Ambient Weight", &ambient, 0.01f, 0.1f);
+	ImGui::Text("Attenuation and Shininess parameters");
+	ImGui::InputFloat("Linear", &linear, 0.01f, 0.1f);
+	ImGui::InputFloat("Quadratic", &quadratic, 0.01f, 0.1f);
+	ImGui::SliderFloat("Shininess", &shininess, 0.0f, 50.0f);
 	ImGui::End();
 }
 
@@ -713,7 +746,7 @@ void FFTCompute(GLfloat deltaTime)
 			break;
 	}
 	remainingFrames = n_frames - passedFrames;
-	printf("Read %d frames at %dHz (%d blocks).\n", n_frames, samplerate, n_frames / hop_s);
+	//printf("Read %d frames at %dHz (%d blocks).\n", n_frames, samplerate, n_frames / hop_s);
 
 }
 

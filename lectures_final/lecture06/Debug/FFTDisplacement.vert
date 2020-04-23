@@ -7,26 +7,19 @@ layout (location = 1) in vec3 normal;
 // UV texture coordinates
 layout (location = 2) in vec2 UV;
 
-// Interpolated UV coordinates to pass to the fragment shader
-out vec2 interp_UV;
-
 // model matrix
 uniform mat4 modelMatrix;
 // view matrix
 uniform mat4 viewMatrix;
 // Projection matrix
 uniform mat4 projectionMatrix;
+// normal matrix
+uniform mat3 normalMatrix;
 
+uniform vec3 pointLightPosition;
+
+// Array storing values for the eight frequency bands
 uniform float frequencyBands[];
-// Uniforms storing values for the eight frequency bands
-/*uniform float deepBass;
-uniform float bass;
-uniform float mediumBass;
-uniform float mediumLow;
-uniform float medium;
-uniform float mediumHigh;
-uniform float high;
-uniform float veryHigh;*/
 
 uniform float time;
 uniform float scrollSpeed;
@@ -34,6 +27,13 @@ uniform float zoom;
 uniform float dPower;
 uniform float streetSize;
 uniform float fade;
+
+// Interpolated UV coordinates to pass to the fragment shader
+out vec2 interp_UV;
+
+out vec3 lightDir;
+out vec3 vNormal;
+out vec3 vViewPosition;
 
 // Some useful functions
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -148,10 +148,19 @@ void main(){
 	
 	noised *= 1.0 - (smoothstep(0.5 - streetSize - fade, 0.5 - streetSize, UV.x) - smoothstep(0.5 + streetSize, 0.5 + streetSize + fade, UV.x));
 
-	
 	float displacement = (noised * DisplaceByFBands()) * dPower;
 	
 	vec3 displacedPosition = position + displacement * normal;
 	
-	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(displacedPosition, 1.0f);
+	vec4 modelView = viewMatrix * modelMatrix * vec4(position, 1.0);
+	
+	vViewPosition = -modelView.xyz;
+	// transformations are applied to the normal
+	vNormal = normalize( normalMatrix * normal );
+
+	// light incidence direction (in view coordinate)
+	vec4 lightPos = viewMatrix  * vec4(pointLightPosition, 1.0);
+	lightDir = lightPos.xyz - modelView.xyz;
+	
+	gl_Position = projectionMatrix * modelView;
 }
