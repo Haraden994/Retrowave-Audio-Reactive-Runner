@@ -1,5 +1,7 @@
 #version 330 core
 
+#define NUM_OCTAVES 5
+
 // vertex position in world coordinates
 layout (location = 0) in vec3 position;
 // vertex normal in world coordinate
@@ -34,6 +36,7 @@ out vec2 interp_UV;
 out vec3 lightDir;
 out vec3 vNormal;
 out vec3 vViewPosition;
+out vec3 vPosition;
 
 // Some useful functions
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -109,6 +112,39 @@ float snoise(vec2 v) {
     return 130.0 * dot(m, g);
 }
 
+float rand(vec2 n)
+{ 
+	return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
+float noise(vec2 p)
+{
+	vec2 ip = floor(p);
+	vec2 u = fract(p);
+	u = u*u*(3.0-2.0*u);
+	
+	float res = mix(
+		mix(rand(ip),rand(ip+vec2(1.0,0.0)),u.x),
+		mix(rand(ip+vec2(0.0,1.0)),rand(ip+vec2(1.0,1.0)),u.x),u.y);
+	return res*res;
+}
+
+// Fractal brownian motion
+float fbm(vec2 x)
+{
+	float v = 0.0;
+	float a = 0.5;
+	vec2 shift = vec2(100);
+	// Rotate to reduce axial bias
+    mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
+	for (int i = 0; i < NUM_OCTAVES; ++i) {
+		v += a * noise(x);
+		x = (rot * x) * 2.0 + shift;
+		a *= 0.5;
+	}
+	return v;
+}
+
 // Displace vertices according to their V value, the grid is divided in eight zones, one for each Frequency Band.
 float DisplaceByFBands(){
     if(UV.y <= 0.125){
@@ -144,15 +180,16 @@ void main(){
     interp_UV -= translate * scrollSpeed;
 	// The amount of zoom applied to the UV coordinates is used to "zoom" in/out the noise
 	vec2 noisePos = vec2(interp_UV * zoom);
-	float noised = snoise(noisePos);
+	float noised = fbm(noisePos);
 	
 	noised *= 1.0 - (smoothstep(0.5 - streetSize - fade, 0.5 - streetSize, UV.x) - smoothstep(0.5 + streetSize, 0.5 + streetSize + fade, UV.x));
 
 	float displacement = (noised * DisplaceByFBands()) * dPower;
 	
 	vec3 displacedPosition = position + displacement * normal;
+	vPosition = displacedPosition;
 	
-	vec4 modelView = viewMatrix * modelMatrix * vec4(position, 1.0);
+	vec4 modelView = viewMatrix * modelMatrix * vec4(displacedPosition, 1.0);
 	
 	vViewPosition = -modelView.xyz;
 	// transformations are applied to the normal

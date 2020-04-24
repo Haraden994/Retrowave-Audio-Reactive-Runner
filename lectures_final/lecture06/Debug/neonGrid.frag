@@ -5,6 +5,7 @@ in vec2 interp_UV;
 in vec3 lightDir;
 in vec3 vNormal;
 in vec3 vViewPosition;
+in vec3 vPosition;
 
 out vec4 outColor;
 
@@ -37,14 +38,15 @@ vec3 Grid(){
 	st = pow(st, vec2(edgeSharpness)) - edgeSubtract;
 	
 	float c = clamp(st.x + st.y, 0.0, 1.0) * glowStrength;
-	return gridColor * c;
+	return c * gridColor;
 }
 
 void main() 
 {
 	vec3 bgColor = ambient * ambientColor;
 	
-	vec3 fNorm = normalize(vNormal);
+	//vec3 fNorm = normalize(vNormal);
+	vec3 fNorm = normalize(cross(dFdx(vViewPosition), dFdy(vViewPosition)));
 	float lightDistance = length(lightDir.xyz);
 	vec3 lightIncidence = normalize(lightDir.xyz);
 	
@@ -58,9 +60,9 @@ void main()
 		vec3 halfVector = normalize(lightIncidence + viewVector);
 		
 		float specAngle = max(dot(halfVector, fNorm), 0.0);
-		// apply the shininess
+		// compute the shininess
 		float shine = pow(specAngle, shininess);
-		// apply diffusive and specular components to the final color
+		// apply diffusive, specular and shininess components to the final color
 		bgColor += vec3(diffuse * lambert * diffuseColor + specular * shine * specularColor);
 		bgColor *= attenuation;
 	}
