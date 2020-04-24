@@ -5,8 +5,8 @@
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
       <wxString Value="C:\Users\night\Desktop\RTGP\lectures_final\lecture06\Retrowave.cpp" Name="FileName"/>
-      <int Value="615" Name="FirstVisibleLine"/>
-      <int Value="671" Name="CurrentLine"/>
+      <int Value="323" Name="FirstVisibleLine"/>
+      <int Value="345" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
@@ -14,6 +14,13 @@
       <wxString Value="C:\Users\night\Desktop\AudioVisualizer\lectures_final\lecture06\imgui_widgets.cpp" Name="FileName"/>
       <int Value="4129" Name="FirstVisibleLine"/>
       <int Value="4145" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="C:\Users\night\Desktop\RTGP\include\glfw\glfw3.h" Name="FileName"/>
+      <int Value="3697" Name="FirstVisibleLine"/>
+      <int Value="3737" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>

@@ -107,11 +107,6 @@ GLfloat lastX = 400, lastY = 300;
 // when rendering the first frame, we do not have a "previous state" for the mouse, so we need to manage this situation
 bool firstMouse = true;
 
-// rotation angle on Y axis
-GLfloat orientationY = 0.0f;
-// rotation speed on Y axis
-GLfloat spin_speed = 30.0f;
-
 // we create a camera. We pass the initial position as a paramenter to the constructor. The last boolean tells that we want a camera "anchored" to the ground
 Camera camera(glm::vec3(0.0f, 0.0f, 7.0f), GL_TRUE);
 
@@ -131,12 +126,13 @@ vector<Shader> shaders;
 // Uniforms to be passed to shaders
 GLfloat sunAnimationSpeed = 2.0f;
 GLfloat sunSize = 2.0f;
-GLfloat gridScrollSpeed = 0.15f;
-GLfloat gridSize = 0.2f;
-GLfloat gridNoiseZoom = 5.0f;
-GLfloat gridDisplacementPower = 30.0f;
+GLfloat gridScrollSpeed = 1.0f;
+GLfloat gridSize = 0.1f;
+GLfloat gridNoiseZoom = 10.0f;
+GLfloat noiseOffset = 0.1f;
+GLfloat gridDisplacementPower = 40.0f;
 GLfloat streetSize = 0.04f;
-GLfloat fadeAfterStreet = 0.2f;
+GLfloat fadeAfterStreet = 0.1f;
 // uniforms for light calculations
 GLfloat diffuseColor[] = {0.0f, 1.0f, 1.0f};
 GLfloat specularColor[] = {1.0f, 1.0f, 1.0f};
@@ -346,6 +342,8 @@ int main()
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "linear"), linear);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "quadratic"), quadratic);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "shininess"), shininess);
+		
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "offset"), noiseOffset);
 		
 		glm::mat4 gridModelMatrix;
 		glm::mat3 gridNormalMatrix;
@@ -677,8 +675,9 @@ void DrawGUI()
 	ImGui::Begin("Environment Parameters");
 	ImGui::TextColored(ImVec4(1.0, 0.0, 1.0, 1.0), "Neon Grid Parameters");
 	ImGui::SliderFloat("Grid Size", &gridSize, 0.1f, 1.0f);
-	ImGui::SliderFloat("Scroll Speed", &gridScrollSpeed, 0.0f, 1.0f);
-	ImGui::SliderFloat("Noise Zoom", &gridNoiseZoom, 0.1f, 10.0f);
+	ImGui::SliderFloat("Scroll Speed", &gridScrollSpeed, 0.0f, 200.0f);
+	ImGui::InputFloat("Noise Zoom", &gridNoiseZoom, 1.0f, 5.0f);
+	ImGui::InputFloat("Offset (zoom dependant)", &noiseOffset, 0.01f, 0.1f);
 	ImGui::SliderFloat("Displacement Power", &gridDisplacementPower, 5.0f, 60.0f);
 	ImGui::InputFloat("Street Size", &streetSize, 0.01f, 0.1f, "%.3f");
 	ImGui::InputFloat("Fade After Street", &fadeAfterStreet, 0.01f, 0.1f, "%.3f");

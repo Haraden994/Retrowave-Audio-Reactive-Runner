@@ -30,6 +30,8 @@ uniform float dPower;
 uniform float streetSize;
 uniform float fade;
 
+uniform float offset;
+
 // Interpolated UV coordinates to pass to the fragment shader
 out vec2 interp_UV;
 
@@ -175,11 +177,16 @@ float DisplaceByFBands(){
 
 void main(){
 	interp_UV = UV;
-	// UV translation for grid movement illusion
-	vec2 translate = vec2(0.0, time);
-    interp_UV -= translate * scrollSpeed;
+	vec2 gridPos = UV;
+	float speed = time * scrollSpeed;
+	// UV translation for noise and grid scrolling animation
+	vec2 translate = vec2(0.0, speed);
+	
+	float speedFrac = fract(speed) * 0.1;
+	//speedFrac = 0;
+	
 	// The amount of zoom applied to the UV coordinates is used to "zoom" in/out the noise
-	vec2 noisePos = vec2(interp_UV * zoom);
+	vec2 noisePos = UV * zoom - floor(translate) * offset;
 	float noised = fbm(noisePos);
 	
 	noised *= 1.0 - (smoothstep(0.5 - streetSize - fade, 0.5 - streetSize, UV.x) - smoothstep(0.5 + streetSize, 0.5 + streetSize + fade, UV.x));
@@ -187,6 +194,7 @@ void main(){
 	float displacement = (noised * DisplaceByFBands()) * dPower;
 	
 	vec3 displacedPosition = position + displacement * normal;
+	displacedPosition.z += speedFrac * 50;
 	vPosition = displacedPosition;
 	
 	vec4 modelView = viewMatrix * modelMatrix * vec4(displacedPosition, 1.0);
