@@ -31,8 +31,6 @@ uniform float dPower;
 uniform float streetSize;
 uniform float fade;
 
-uniform float offset;
-
 // Interpolated UV coordinates to pass to the fragment shader
 out vec2 interp_UV;
 
@@ -188,7 +186,7 @@ void main()
 	
 	// the noise is also traslated by multiplying the floor of the translation with an offset depending on the zoom value (offset = zoom * 10^-2)
 	// the resulting translation let the noise move row by row along the grid.
-	vec2 noisePos = UV * zoom - floor(translate) * offset;
+	vec2 noisePos = UV * zoom - floor(translate) * (zoom / 100.0);
 	float noised = fbm(noisePos);
 	
 	// we add the street space into the grid by smoothing the noise

@@ -129,7 +129,6 @@ GLfloat sunSize = 2.0f;
 GLfloat gridScrollSpeed = 1.0f;
 GLfloat gridSize = 0.1f;
 GLfloat gridNoiseZoom = 10.0f;
-GLfloat noiseOffset = 0.1f;
 GLfloat gridDisplacementPower = 40.0f;
 GLfloat streetSize = 0.04f;
 GLfloat fadeAfterStreet = 0.1f;
@@ -342,8 +341,6 @@ int main()
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "linear"), linear);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "quadratic"), quadratic);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "shininess"), shininess);
-		
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "offset"), noiseOffset);
 		
 		glm::mat4 gridModelMatrix;
 		glm::mat3 gridNormalMatrix;
@@ -677,7 +674,6 @@ void DrawGUI()
 	ImGui::SliderFloat("Grid Size", &gridSize, 0.1f, 1.0f);
 	ImGui::SliderFloat("Scroll Speed", &gridScrollSpeed, 0.0f, 200.0f);
 	ImGui::InputFloat("Noise Zoom", &gridNoiseZoom, 1.0f, 5.0f);
-	ImGui::InputFloat("Offset (zoom dependant)", &noiseOffset, 0.01f, 0.1f);
 	ImGui::SliderFloat("Displacement Power", &gridDisplacementPower, 5.0f, 60.0f);
 	ImGui::InputFloat("Street Size", &streetSize, 0.01f, 0.1f, "%.3f");
 	ImGui::InputFloat("Fade After Street", &fadeAfterStreet, 0.01f, 0.1f, "%.3f");
