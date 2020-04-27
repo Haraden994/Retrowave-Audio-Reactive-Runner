@@ -31,8 +31,6 @@ uniform float dPower;
 uniform float streetSize;
 uniform float fade;
 
-uniform float offset;
-
 // Interpolated UV coordinates to pass to the fragment shader
 out vec2 interp_UV;
 

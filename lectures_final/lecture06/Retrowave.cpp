@@ -125,7 +125,7 @@ vector<Shader> shaders;
 
 // Uniforms to be passed to shaders
 GLfloat sunAnimationSpeed = 2.0f;
-GLfloat sunSize = 2.0f;
+GLfloat sunSize = 7.0f;
 GLfloat gridScrollSpeed = 1.0f;
 GLfloat gridSize = 0.1f;
 GLfloat gridNoiseZoom = 10.0f;
@@ -133,24 +133,24 @@ GLfloat gridDisplacementPower = 40.0f;
 GLfloat streetSize = 0.04f;
 GLfloat fadeAfterStreet = 0.1f;
 // uniforms for light calculations
-GLfloat diffuseColor[] = {0.0f, 1.0f, 1.0f};
-GLfloat specularColor[] = {1.0f, 1.0f, 1.0f};
+GLfloat diffuseColor[] = {1.0f, 0.17, 0.6};
+GLfloat specularColor[] = {0.0f, 1.0f, 1.0f};
 GLfloat ambientColor[] = {1.0f, 0.0f, 1.0f};
 // diffuse, specular and ambient weights for Blinn-Phong lighting shader
-GLfloat diffuse = 0.6f;
-GLfloat specular = 0.2f;
-GLfloat ambient = 0.6f;
+GLfloat diffuse = 1.0f;
+GLfloat specular = 0.6f;
+GLfloat ambient = 0.3f;
 // attenuation parameters
 GLfloat constant = 1.0f;
-GLfloat linear = 0.02f;
-GLfloat quadratic = 0.001f;
+GLfloat linear = 0.04f;
+GLfloat quadratic = 0.00f;
 // shininess coefficient
 GLfloat shininess = 25.0f;
 
 // Variables
 string musicPath = "../../../Music/SneakyDriver_KatanaZeroOST.wav";
 float bufferDecreaseAmount = 0.00005;
-float sunPosition[] = {0.0f, 0.0f, 0.0f};
+float sunPosition[] = {0.0f, 5.0f, -25.0f};
 glm::vec3 lightPosition = glm::vec3(sunPosition[0], sunPosition[1], sunPosition[2]);
 
 // texture unit for the cube map
