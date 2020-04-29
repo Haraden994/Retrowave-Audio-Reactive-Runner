@@ -108,7 +108,7 @@ GLfloat lastX = 400, lastY = 300;
 bool firstMouse = true;
 
 // we create a camera. We pass the initial position as a paramenter to the constructor. The last boolean tells that we want a camera "anchored" to the ground
-Camera camera(glm::vec3(0.0f, 0.0f, 7.0f), GL_TRUE);
+Camera camera(glm::vec3(0.0f, 0.0f, 7.0f), GL_FALSE);
 
 // parameters for time calculation
 GLfloat deltaTime = 0.0f;
@@ -126,7 +126,7 @@ vector<Shader> shaders;
 // Uniforms to be passed to shaders
 GLfloat sunAnimationSpeed = 2.0f;
 GLfloat sunSize = 7.0f;
-GLfloat gridScrollSpeed = 1.0f;
+GLfloat gridScrollSpeed = 5.0f;
 GLfloat gridSize = 0.1f;
 GLfloat gridNoiseZoom = 10.0f;
 GLfloat gridDisplacementPower = 40.0f;
@@ -256,6 +256,8 @@ int main()
 	shaders.push_back(skybox_shader);
 	Shader qSun_shader("retrosun.vert", "retrosunQuad.frag");
 	shaders.push_back(qSun_shader);
+	Shader palm_shader("palm.vert", "palm.frag");
+	shaders.push_back(palm_shader);
 	
 	// we load the cube map (we pass the path to the folder containing the 6 views)
     textureCube = LoadTextureCube("../../../textures/cube/Purple/");
@@ -265,6 +267,7 @@ int main()
 	Model skyboxModel("../../../models/flippedCube.obj");
 	Model gridModel("../../../models/grid500m100x100.obj");
 	Model quadModel("../../../models/myPlane.obj");
+	Model palmModel("../../../models/palm.obj");
 
     // we set projection and view matrices
     // N.B.) in this case, the camera is fixed -> we set it up outside the rendering loop
@@ -278,12 +281,22 @@ int main()
 	FFTInitialize(musicPath);
 	soundEngine->play2D(musicPath.c_str(), true);
 	
-    // Rendering loop: this code is executed at each frame
+	// Palms parameters initialization
+	float palmStartingZ = -24.0f;
+	unsigned int amount = 20;
+	float zOffset = 50.0f / (float)amount;
+	float palmZPositions[amount];
+	for(int i = 0; i < amount; i++){
+		palmZPositions[i] = palmStartingZ + zOffset * i;
+		palmZPositions[i+1] = palmStartingZ + zOffset * i;
+		i++;
+	}
+	
+	// Rendering loop: this code is executed at each frame
     while(!glfwWindowShouldClose(window))
     {
         // we determine the time passed from the beginning
         // and we calculate time difference between current frame rendering and the previous one
-		GLfloat currentFrameNoMusic = glfwGetTime();
         GLfloat currentFrame = glfwGetTime() - musicStartTime;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -323,7 +336,7 @@ int main()
 		
 		// animation and music uniforms
 		glUniform1fv(glGetUniformLocation(grid_shader.Program, "frequencyBands"), bandsBuffer.size(), &bandsBuffer[0]);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "time"), currentFrameNoMusic);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "time"), glfwGetTime());
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "scrollSpeed"), gridScrollSpeed);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "zoom"), gridNoiseZoom);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "dPower"), gridDisplacementPower);
@@ -344,7 +357,7 @@ int main()
 		
 		glm::mat4 gridModelMatrix;
 		glm::mat3 gridNormalMatrix;
-		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, -10.0f, 0.0f));
+		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, -0.5f, 0.0f));
 		gridModelMatrix = glm::scale(gridModelMatrix, glm::vec3(gridSize, 1.0f, gridSize));
 		// not considering translations on normal matrix, useful for lighting calculations
 		gridNormalMatrix = glm::inverseTranspose(glm::mat3(view * gridModelMatrix));
@@ -352,6 +365,74 @@ int main()
 		glUniformMatrix3fv(glGetUniformLocation(grid_shader.Program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(gridNormalMatrix));
 		
 		gridModel.Draw(grid_shader);
+		
+		/////////////////// PALM ///////////////////////////////////
+		// Palm instancing
+		glm::mat4* modelMatrices;
+		modelMatrices = new glm::mat4[amount];
+		float x = (streetSize*100.0f) / 2.0f; // x position is streetSize depending
+		float palmTranslationSpeed = gridScrollSpeed * 0.505f;
+		for(int i = 0; i < amount; i++){
+			glm::mat4 rightModelMatrix = glm::mat4(1.0f);
+			glm::mat4 leftModelMatrix = glm::mat4(1.0f);
+			palmZPositions[i] += palmTranslationSpeed * deltaTime;
+			if(palmZPositions[i] > 25.0f)
+				palmZPositions[i] = palmStartingZ;
+			rightModelMatrix = glm::translate(rightModelMatrix, glm::vec3(-x, -0.5f, palmZPositions[i]));
+			leftModelMatrix = glm::translate(leftModelMatrix, glm::vec3(x, -0.5f, palmZPositions[i]));
+			leftModelMatrix = glm::rotate(leftModelMatrix, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+			rightModelMatrix = glm::scale(rightModelMatrix, glm::vec3(0.15f));
+			leftModelMatrix = glm::scale(leftModelMatrix, glm::vec3(0.15f));
+			modelMatrices[i] = rightModelMatrix;
+			modelMatrices[i+1] = leftModelMatrix;
+			i++;
+		}
+		
+		unsigned int buffer;
+		glGenBuffers(1, &buffer);
+		glBindBuffer(GL_ARRAY_BUFFER, buffer);
+		glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_DYNAMIC_DRAW);
+		
+		for(unsigned int i = 0; i < palmModel.meshes.size(); i++){
+			unsigned int VAO = palmModel.meshes[i].VAO;
+			glBindVertexArray(VAO);
+			glEnableVertexAttribArray(3);
+			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+			glEnableVertexAttribArray(4);
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+			glEnableVertexAttribArray(5);
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+			glEnableVertexAttribArray(6);
+			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+			
+			glVertexAttribDivisor(3, 1);
+			glVertexAttribDivisor(4, 1);
+			glVertexAttribDivisor(5, 1);
+			glVertexAttribDivisor(6, 1);
+
+			glBindVertexArray(0);
+		}
+		
+		palm_shader.Use();
+		
+		glUniformMatrix4fv(glGetUniformLocation(palm_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(palm_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+		
+		for(unsigned int i = 0; i < palmModel.meshes.size(); i++){
+			glBindVertexArray(palmModel.meshes[i].VAO);
+			glDrawElementsInstanced(GL_TRIANGLES, palmModel.meshes[i].indices.size(), GL_UNSIGNED_INT, 0, amount);
+			glBindVertexArray(0);
+		}
+		
+		/*glm::mat4 palmModelMatrix;
+		glm::mat3 palmNormalMatrix;
+		palmModelMatrix = glm::translate(palmModelMatrix, glm::vec3(sunPosition[0], sunPosition[1], sunPosition[2]));
+		palmModelMatrix = glm::scale(palmModelMatrix, glm::vec3(0.13f, 0.13f, 0.13f));
+		palmNormalMatrix = glm::inverseTranspose(glm::mat3(view * palmModelMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(palm_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(palmModelMatrix));
+		glUniformMatrix3fv(glGetUniformLocation(palm_shader.Program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(palmNormalMatrix));
+		
+		palmModel.Draw(grid_shader);*/
 		
         /////////////////// SKYBOX ////////////////////////////////////////////////
 		
@@ -384,7 +465,7 @@ int main()
 		qSun_shader.Use();
 		
 		// uniforms are passed to the corresponding shader
-		glUniform1f(glGetUniformLocation(qSun_shader.Program, "u_time"), currentFrameNoMusic * sunAnimationSpeed);
+		glUniform1f(glGetUniformLocation(qSun_shader.Program, "u_time"), glfwGetTime() * sunAnimationSpeed);
 		
 		// we pass projection and view matrices to the Shader Program
         glUniformMatrix4fv(glGetUniformLocation(qSun_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -672,7 +753,7 @@ void DrawGUI()
 	ImGui::Begin("Environment Parameters");
 	ImGui::TextColored(ImVec4(1.0, 0.0, 1.0, 1.0), "Neon Grid Parameters");
 	ImGui::SliderFloat("Grid Size", &gridSize, 0.1f, 1.0f);
-	ImGui::SliderFloat("Scroll Speed", &gridScrollSpeed, 0.0f, 200.0f);
+	ImGui::InputFloat("Scroll Speed", &gridScrollSpeed, 0.5f, 1.0f);
 	ImGui::InputFloat("Noise Zoom", &gridNoiseZoom, 1.0f, 5.0f);
 	ImGui::SliderFloat("Displacement Power", &gridDisplacementPower, 5.0f, 60.0f);
 	ImGui::InputFloat("Street Size", &streetSize, 0.01f, 0.1f, "%.3f");

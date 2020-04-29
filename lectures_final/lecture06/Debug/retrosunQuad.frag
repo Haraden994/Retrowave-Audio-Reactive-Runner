@@ -34,7 +34,7 @@ void main()
     
     // sun haze
     float sunHazePct = circle(interp_UV, 0.7, 0.35);
-    fragColor = vec4(vec3(0.909, 0.167, 0.596) * sunHazePct, sunHazePct * 0.35);
+    fragColor = vec4(vec3(1.0, 0.17, 0.6) * sunHazePct, sunHazePct * 0.35);
     
     // sun color
     // get a 0 -> 1 value within our sun
@@ -43,7 +43,7 @@ void main()
     float lineSize = mix(0.3, 0.0, interp_UV.y);
     
     // lerp between our sun colors to get a gradient
-    vec4 sunColor = vec4(mix(vec3(0.909, 0.167, 0.596), vec3(1, 0.913, 0.305), sunValue), 1.0);
+    vec4 sunColor = vec4(mix(vec3(1.0, 0.17, 0.6), vec3(1, 0.9, 0.3), sunValue), 1.0);
     
     // line speed ( 1 - to make it go down)
     float lineInt = 1.0 - fract(u_time * 0.3);
