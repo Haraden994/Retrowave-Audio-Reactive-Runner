@@ -170,7 +170,7 @@ float DisplaceByFBands(){
         return mix(frequencyBands[6], frequencyBands[7], (UV.y - 0.75) / 0.125);
     }
 	if(UV.y <= 1.0){
-		return frequencyBands[7];
+		return mix(frequencyBands[7], frequencyBands[0], (UV.y - 0.875) / 0.125);
 	}
 }
 

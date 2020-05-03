@@ -152,6 +152,8 @@ string musicPath = "../../../Music/SneakyDriver_KatanaZeroOST.wav";
 float bufferDecreaseAmount = 0.00005;
 float sunPosition[] = {0.0f, 5.0f, -25.0f};
 glm::vec3 lightPosition = glm::vec3(sunPosition[0], sunPosition[1], sunPosition[2]);
+float carXPos = 0.0f;
+float carTurnAngle = 0.0f;
 
 // texture unit for the cube map
 GLuint textureCube;
@@ -258,6 +260,8 @@ int main()
 	shaders.push_back(qSun_shader);
 	Shader palm_shader("palm.vert", "palm.frag");
 	shaders.push_back(palm_shader);
+	Shader car_shader("13_phong.vert", "14_ggx.frag");
+	shaders.push_back(car_shader);
 	
 	// we load the cube map (we pass the path to the folder containing the 6 views)
     textureCube = LoadTextureCube("../../../textures/cube/Purple/");
@@ -268,6 +272,7 @@ int main()
 	Model gridModel("../../../models/grid500m100x100.obj");
 	Model quadModel("../../../models/myPlane.obj");
 	Model palmModel("../../../models/palm.obj");
+	Model carModel("../../../models/Countach.obj");
 
     // we set projection and view matrices
     // N.B.) in this case, the camera is fixed -> we set it up outside the rendering loop
@@ -366,11 +371,16 @@ int main()
 		
 		gridModel.Draw(grid_shader);
 		
+		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, 0.0f, -500.0f));
+		glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(gridModelMatrix));
+		
+		gridModel.Draw(grid_shader);
+		
 		/////////////////// PALM ///////////////////////////////////
 		// Palm instancing
 		glm::mat4* modelMatrices;
 		modelMatrices = new glm::mat4[amount];
-		float x = (streetSize*100.0f) / 2.0f; // x position is streetSize depending
+		float streetBorder = (streetSize*100.0f) / 2.0f; // x position is streetSize depending
 		float palmTranslationSpeed = gridScrollSpeed * 0.505f;
 		for(int i = 0; i < amount; i++){
 			glm::mat4 rightModelMatrix = glm::mat4(1.0f);
@@ -378,8 +388,8 @@ int main()
 			palmZPositions[i] += palmTranslationSpeed * deltaTime;
 			if(palmZPositions[i] > 25.0f)
 				palmZPositions[i] = palmStartingZ;
-			rightModelMatrix = glm::translate(rightModelMatrix, glm::vec3(-x, -0.5f, palmZPositions[i]));
-			leftModelMatrix = glm::translate(leftModelMatrix, glm::vec3(x, -0.5f, palmZPositions[i]));
+			rightModelMatrix = glm::translate(rightModelMatrix, glm::vec3(-streetBorder, -0.5f, palmZPositions[i]));
+			leftModelMatrix = glm::translate(leftModelMatrix, glm::vec3(streetBorder, -0.5f, palmZPositions[i]));
 			leftModelMatrix = glm::rotate(leftModelMatrix, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 			rightModelMatrix = glm::scale(rightModelMatrix, glm::vec3(0.15f));
 			leftModelMatrix = glm::scale(leftModelMatrix, glm::vec3(0.15f));
@@ -391,7 +401,7 @@ int main()
 		unsigned int buffer;
 		glGenBuffers(1, &buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_DYNAMIC_DRAW); // No difference in terms of FPS.....
 		
 		for(unsigned int i = 0; i < palmModel.meshes.size(); i++){
 			unsigned int VAO = palmModel.meshes[i].VAO;
@@ -433,6 +443,55 @@ int main()
 		glUniformMatrix3fv(glGetUniformLocation(palm_shader.Program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(palmNormalMatrix));
 		
 		palmModel.Draw(grid_shader);*/
+		
+		/////////////////// CAR /////////////////////////////////
+		
+		car_shader.Use();
+		
+		glUniformMatrix4fv(glGetUniformLocation(car_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(car_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+		
+		glUniform3fv(glGetUniformLocation(car_shader.Program, "pointLightPosition"), 1, glm::value_ptr(lightPosition));
+		glUniform3fv(glGetUniformLocation(car_shader.Program, "diffuseColor"), 1, diffuseColor);
+		glUniform1f(glGetUniformLocation(car_shader.Program, "Kd"), diffuse);
+		glUniform1f(glGetUniformLocation(car_shader.Program, "alpha"), 0.2f);
+		glUniform1f(glGetUniformLocation(car_shader.Program, "F0"), 0.9f);
+		
+		glm::mat4 carModelMatrix;
+		glm::mat3 carNormalMatrix;
+		// car engine tremble
+		float trembleSpeed = 100.0f;
+		float trembleTranslation = 0.005f;
+		float maxTurnAngle = 2.0f;
+		float turnSpeed = 40.0f;
+		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(std::cos(glfwGetTime() * trembleSpeed) * trembleTranslation, std::sin(glfwGetTime() * trembleSpeed) * trembleTranslation, 24.0f));
+		if(keys[GLFW_KEY_A] && carXPos >= (-streetBorder + 1.0f)){
+			carXPos -= deltaTime * 2.0f;
+			if(carTurnAngle <= maxTurnAngle)
+				carTurnAngle += deltaTime * turnSpeed;
+		}
+		if(keys[GLFW_KEY_D] && carXPos <= (streetBorder - 1.0f)){
+			carXPos += deltaTime * 2.0f;
+			if(carTurnAngle >= -maxTurnAngle)
+				carTurnAngle -= deltaTime * turnSpeed;
+		}
+		if(!keys[GLFW_KEY_A] && !keys[GLFW_KEY_D]){
+			if(carTurnAngle != 0.0f){
+				if(carTurnAngle >= 0.0f)
+					carTurnAngle -= deltaTime * turnSpeed;
+				else if(carTurnAngle <= 0.0f)
+					carTurnAngle += deltaTime * turnSpeed;
+			}
+		}
+		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(carXPos, 0.0f, 0.0f));
+		carModelMatrix = glm::rotate(carModelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		carModelMatrix = glm::rotate(carModelMatrix, glm::radians(carTurnAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+        carModelMatrix = glm::scale(carModelMatrix, glm::vec3(1.005f, 1.005f, 1.005f));
+		carNormalMatrix = glm::inverseTranspose(glm::mat3(view * carModelMatrix));
+        glUniformMatrix4fv(glGetUniformLocation(car_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(carModelMatrix));
+        glUniformMatrix3fv(glGetUniformLocation(car_shader.Program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(carNormalMatrix));
+		
+		carModel.Draw(car_shader);
 		
         /////////////////// SKYBOX ////////////////////////////////////////////////
 		
@@ -628,10 +687,10 @@ void apply_camera_movements()
         camera.ProcessKeyboard(FORWARD, deltaTime * speed);
     if(keys[GLFW_KEY_S])
         camera.ProcessKeyboard(BACKWARD, deltaTime * speed);
-    if(keys[GLFW_KEY_A])
+    /*if(keys[GLFW_KEY_A])
         camera.ProcessKeyboard(LEFT, deltaTime * speed);
     if(keys[GLFW_KEY_D])
-        camera.ProcessKeyboard(RIGHT, deltaTime * speed);
+        camera.ProcessKeyboard(RIGHT, deltaTime * speed);*/
 }
 
 //////////////////////////////////////////

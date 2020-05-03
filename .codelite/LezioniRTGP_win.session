@@ -5,8 +5,22 @@
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
       <wxString Value="C:\Users\night\Desktop\RTGP\lectures_final\lecture06\Retrowave.cpp" Name="FileName"/>
-      <int Value="352" Name="FirstVisibleLine"/>
-      <int Value="376" Name="CurrentLine"/>
+      <int Value="450" Name="FirstVisibleLine"/>
+      <int Value="466" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="C:\Users\night\Desktop\RTGP\include\utils\model_v2.h" Name="FileName"/>
+      <int Value="82" Name="FirstVisibleLine"/>
+      <int Value="84" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="C:\Users\night\Desktop\RTGP\include\utils\mesh_v2.h" Name="FileName"/>
+      <int Value="42" Name="FirstVisibleLine"/>
+      <int Value="58" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
