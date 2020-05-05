@@ -14,9 +14,9 @@ uniform vec3 diffuseColor;
 uniform vec3 specularColor;
 uniform vec3 ambientColor;
 // weights
-uniform float diffuse;
-uniform float specular;
-uniform float ambient;
+uniform float Kd;
+uniform float Ks;
+uniform float Ka;
 // attenuation parameters
 uniform float constant;
 uniform float linear;
@@ -31,6 +31,9 @@ const float edgeSubtract = 0.3;
 const float glowStrength = 10.0;
 const float gridZoom = 99.0;
 
+uniform float streetSize;
+uniform float fade;
+
 vec3 Grid(){
 	vec2 st = vec2(interp_UV * gridZoom);
 	st = fract(st);
@@ -38,12 +41,16 @@ vec3 Grid(){
 	st = pow(st, vec2(edgeSharpness)) - edgeSubtract;
 	
 	float c = clamp(st.x + st.y, 0.0, 1.0) * glowStrength;
+	/*float street = step(streetSize, st.x);
+	street *= step(streetSize, 1.0 - st.x);
+	c *= 1.0 - (smoothstep(0.5 - streetSize - fade, 0.5 - streetSize, interp_UV.x) - smoothstep(0.5 + streetSize, 0.5 + streetSize + fade, interp_UV.x));
+	c *= street;*/
 	return c * gridColor;
 }
 
 void main() 
 {
-	vec3 bgColor = ambient * ambientColor;
+	vec3 bgColor = Ka * ambientColor;
 	
 	//vec3 fNorm = normalize(vNormal);
 	vec3 fNorm = normalize(cross(dFdx(vViewPosition), dFdy(vViewPosition)));
@@ -63,7 +70,7 @@ void main()
 		// compute the shininess
 		float shine = pow(specAngle, shininess);
 		// apply diffusive, specular and shininess components to the final color
-		bgColor += vec3(diffuse * lambert * diffuseColor + specular * shine * specularColor);
+		bgColor += vec3(Kd * lambert * diffuseColor + Ks * shine * specularColor);
 		bgColor *= attenuation;
 	}
 	

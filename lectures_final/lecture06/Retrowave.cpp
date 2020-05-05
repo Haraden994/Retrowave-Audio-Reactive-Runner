@@ -17,6 +17,7 @@ positive Z axis points "outside" the screen
 
 // Std. Includes
 #include <string>
+#include <random>
 
 // Loader for OpenGL extensions
 // http://glad.dav1d.de/
@@ -53,6 +54,7 @@ positive Z axis points "outside" the screen
 #include <utils/shader_v1.h>
 #include <utils/model_v2.h>
 #include <utils/camera.h>
+#include <utils/physics_v1.h>
 
 // we load the GLM classes used in the application
 #include <glm/glm.hpp>
@@ -126,7 +128,7 @@ vector<Shader> shaders;
 // Uniforms to be passed to shaders
 GLfloat sunAnimationSpeed = 2.0f;
 GLfloat sunSize = 7.0f;
-GLfloat gridScrollSpeed = 5.0f;
+GLfloat gridScrollSpeed = 0.0f;
 GLfloat gridSize = 0.1f;
 GLfloat gridNoiseZoom = 10.0f;
 GLfloat gridDisplacementPower = 40.0f;
@@ -148,12 +150,14 @@ GLfloat quadratic = 0.00f;
 GLfloat shininess = 25.0f;
 
 // Variables
+bool once = true;
 string musicPath = "../../../Music/SneakyDriver_KatanaZeroOST.wav";
-float bufferDecreaseAmount = 0.00005;
-float sunPosition[] = {0.0f, 5.0f, -25.0f};
+GLfloat bufferDecreaseAmount = 0.00005f;
+GLfloat sunPosition[] = {0.0f, 5.0f, -25.0f};
 glm::vec3 lightPosition = glm::vec3(sunPosition[0], sunPosition[1], sunPosition[2]);
-float carXPos = 0.0f;
-float carTurnAngle = 0.0f;
+GLfloat carXPos = 0.0f;
+GLfloat carTurnAngle = 0.0f;
+GLfloat streetBorder = (streetSize*100.0f) / 2.0f;
 
 // texture unit for the cube map
 GLuint textureCube;
@@ -165,10 +169,14 @@ vector<float> bandsBuffer;
 vector<float> bufferDecrease;
 // Initialization of irrKlang for audio reproduction
 irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
+// Instance of the physics class
+Physics collisionSimulation;
 
 /////////////////// MAIN function ///////////////////////
 int main()
 {
+	srand(glfwGetTime());
+	
 	if (!soundEngine)
 	{
 		std::cout << "Could not startup the audio engine." << std::endl;
@@ -225,7 +233,7 @@ int main()
     }
 
     // we define the viewport dimensions
-    int width, height;
+    GLint width, height;
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
@@ -236,6 +244,9 @@ int main()
 	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_BACK);
 	glEnable(GL_BLEND);
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     //the "clear" color for the frame buffer
@@ -260,6 +271,8 @@ int main()
 	shaders.push_back(qSun_shader);
 	Shader palm_shader("palm.vert", "palm.frag");
 	shaders.push_back(palm_shader);
+	Shader full_color("palmOutline.vert", "palmOutline.frag");
+	shaders.push_back(full_color);
 	Shader car_shader("13_phong.vert", "14_ggx.frag");
 	shaders.push_back(car_shader);
 	
@@ -287,15 +300,35 @@ int main()
 	soundEngine->play2D(musicPath.c_str(), true);
 	
 	// Palms parameters initialization
-	float palmStartingZ = -24.0f;
-	unsigned int amount = 20;
-	float zOffset = 50.0f / (float)amount;
-	float palmZPositions[amount];
-	for(int i = 0; i < amount; i++){
+	GLfloat palmStartingZ = -75.0f;
+	GLuint palmAmount = 40;
+	GLfloat zOffset = 100.0f / (float)palmAmount;
+	GLfloat palmZPositions[palmAmount];
+	for(int i = 0; i < palmAmount; i++){
 		palmZPositions[i] = palmStartingZ + zOffset * i;
 		palmZPositions[i+1] = palmStartingZ + zOffset * i;
 		i++;
 	}
+	
+	// Powerup parameters
+	GLuint pwAmount = 10;
+	GLint maxZ = 200;
+	GLint minZ = 75;
+	GLfloat pwZPositions[pwAmount];
+	GLfloat pwXPositions[pwAmount];
+	GLint respawnThreshold;
+	for(int i = 0; i < pwAmount; i++){
+		pwZPositions[i] = 29.0f;
+	}
+		
+	// Rigidbodies
+	glm::vec3 plane_pos = glm::vec3(0.0f, -0.5f, 0.0f);
+	glm::vec3 plane_size = glm::vec3(200.0f, 0.1f, 200.0f);
+	glm::vec3 plane_rot = glm::vec3(0.0f, 0.0f, 0.0f);
+	btRigidBody* planeRB = collisionSimulation.createRigidBody(BOX, plane_pos, plane_size, plane_rot, 0.0f, 0.3f, 0.3f);
+	
+	btRigidBody* carRB;
+	
 	
 	// Rendering loop: this code is executed at each frame
     while(!glfwWindowShouldClose(window))
@@ -319,7 +352,8 @@ int main()
         glm::mat4 view = camera.GetViewMatrix();
 		
 		// we "clear" the frame and z buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glStencilMask(~0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // we set the rendering mode
         if (wireframe)
@@ -332,8 +366,10 @@ int main()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureCube);
 		
-		///////////////////// NEONGRID /////////////////////
+		// We disable the stencil writing, we just need it for the palms' neon effect
+		glStencilMask(0x00);
 		
+		///////////////////// NEONGRID /////////////////////
 		grid_shader.Use();
 		
 		glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -352,9 +388,9 @@ int main()
 		glUniform3fv(glGetUniformLocation(grid_shader.Program, "diffuseColor"), 1, diffuseColor);
 		glUniform3fv(glGetUniformLocation(grid_shader.Program, "specularColor"), 1, specularColor);
 		glUniform3fv(glGetUniformLocation(grid_shader.Program, "ambientColor"), 1, ambientColor);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "diffuse"), diffuse);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "specular"), specular);
-		glUniform1f(glGetUniformLocation(grid_shader.Program, "ambient"), ambient);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "Kd"), diffuse);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "Ks"), specular);
+		glUniform1f(glGetUniformLocation(grid_shader.Program, "Ka"), ambient);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "constant"), constant);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "linear"), linear);
 		glUniform1f(glGetUniformLocation(grid_shader.Program, "quadratic"), quadratic);
@@ -371,18 +407,19 @@ int main()
 		
 		gridModel.Draw(grid_shader);
 		
-		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, 0.0f, -500.0f));
+		gridModelMatrix = glm::translate(gridModelMatrix, glm::vec3(0.0f, 0.0f, -490.0f));
 		glUniformMatrix4fv(glGetUniformLocation(grid_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(gridModelMatrix));
 		
 		gridModel.Draw(grid_shader);
 		
 		/////////////////// PALM ///////////////////////////////////
-		// Palm instancing
 		glm::mat4* modelMatrices;
-		modelMatrices = new glm::mat4[amount];
-		float streetBorder = (streetSize*100.0f) / 2.0f; // x position is streetSize depending
-		float palmTranslationSpeed = gridScrollSpeed * 0.505f;
-		for(int i = 0; i < amount; i++){
+		glm::mat3* normalMatrices;
+		modelMatrices = new glm::mat4[palmAmount];
+		normalMatrices = new glm::mat3[palmAmount];
+		streetBorder = (streetSize*100.0f) / 2.0f; // x position is streetSize depending
+		GLfloat palmTranslationSpeed = gridScrollSpeed * 0.505f;
+		for(int i = 0; i < palmAmount; i++){
 			glm::mat4 rightModelMatrix = glm::mat4(1.0f);
 			glm::mat4 leftModelMatrix = glm::mat4(1.0f);
 			palmZPositions[i] += palmTranslationSpeed * deltaTime;
@@ -394,14 +431,16 @@ int main()
 			rightModelMatrix = glm::scale(rightModelMatrix, glm::vec3(0.15f));
 			leftModelMatrix = glm::scale(leftModelMatrix, glm::vec3(0.15f));
 			modelMatrices[i] = rightModelMatrix;
+			normalMatrices[i] = glm::inverseTranspose(glm::mat3(view * modelMatrices[i]));
 			modelMatrices[i+1] = leftModelMatrix;
+			normalMatrices[i+1] = glm::inverseTranspose(glm::mat3(view * modelMatrices[i+1]));
 			i++;
 		}
-		
+		/*
 		unsigned int buffer;
 		glGenBuffers(1, &buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_DYNAMIC_DRAW); // No difference in terms of FPS.....
+		glBufferData(GL_ARRAY_BUFFER, palmAmount * sizeof(glm::mat4), &modelMatrices[0], GL_DYNAMIC_DRAW); // No difference in terms of FPS.....
 		
 		for(unsigned int i = 0; i < palmModel.meshes.size(); i++){
 			unsigned int VAO = palmModel.meshes[i].VAO;
@@ -422,27 +461,55 @@ int main()
 
 			glBindVertexArray(0);
 		}
+		*/
+		for(int i = 0; i < palmAmount; i++){
+			
+			palm_shader.Use();
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
+			
+			glUniformMatrix4fv(glGetUniformLocation(palm_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
+			glUniformMatrix4fv(glGetUniformLocation(palm_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+			
+			// lighting uniforms
+			glUniform3fv(glGetUniformLocation(palm_shader.Program, "pointLightPosition"), 1, glm::value_ptr(lightPosition));
+			glUniform3fv(glGetUniformLocation(palm_shader.Program, "diffuseColor"), 1, diffuseColor);
+			glUniform3fv(glGetUniformLocation(palm_shader.Program, "specularColor"), 1, specularColor);
+			glUniform3fv(glGetUniformLocation(palm_shader.Program, "ambientColor"), 1, ambientColor);
+			glUniform1f(glGetUniformLocation(palm_shader.Program, "Kd"), 0.0f);
+			glUniform1f(glGetUniformLocation(palm_shader.Program, "Ks"), 1.0f);
+			glUniform1f(glGetUniformLocation(palm_shader.Program, "Ka"), 0.0f);
+			glUniform1f(glGetUniformLocation(palm_shader.Program, "constant"), constant);
+			glUniform1f(glGetUniformLocation(palm_shader.Program, "linear"), linear);
+			glUniform1f(glGetUniformLocation(palm_shader.Program, "quadratic"), quadratic);
+			glUniform1f(glGetUniformLocation(palm_shader.Program, "shininess"), shininess);
 		
-		palm_shader.Use();
-		
-		glUniformMatrix4fv(glGetUniformLocation(palm_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(glGetUniformLocation(palm_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
-		
-		for(unsigned int i = 0; i < palmModel.meshes.size(); i++){
-			glBindVertexArray(palmModel.meshes[i].VAO);
-			glDrawElementsInstanced(GL_TRIANGLES, palmModel.meshes[i].indices.size(), GL_UNSIGNED_INT, 0, amount);
-			glBindVertexArray(0);
+			glUniformMatrix4fv(glGetUniformLocation(palm_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrices[i]));
+			glUniformMatrix3fv(glGetUniformLocation(palm_shader.Program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrices[i]));
+			palmModel.Draw(palm_shader);
+			
+			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+			glStencilMask(0x00);
+			
+			full_color.Use();
+			
+			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
+			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+			glm::mat4 palmModelMatrix = modelMatrices[i];
+			palmModelMatrix = glm::translate(palmModelMatrix, glm::vec3(0.0f, -2.0f, 0.0f));
+			palmModelMatrix = glm::scale(palmModelMatrix, glm::vec3(1.1f));
+			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(palmModelMatrix));
+			
+			palmModel.Draw(full_color);
+			
 		}
 		
-		/*glm::mat4 palmModelMatrix;
-		glm::mat3 palmNormalMatrix;
-		palmModelMatrix = glm::translate(palmModelMatrix, glm::vec3(sunPosition[0], sunPosition[1], sunPosition[2]));
-		palmModelMatrix = glm::scale(palmModelMatrix, glm::vec3(0.13f, 0.13f, 0.13f));
-		palmNormalMatrix = glm::inverseTranspose(glm::mat3(view * palmModelMatrix));
-		glUniformMatrix4fv(glGetUniformLocation(palm_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(palmModelMatrix));
-		glUniformMatrix3fv(glGetUniformLocation(palm_shader.Program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(palmNormalMatrix));
-		
-		palmModel.Draw(grid_shader);*/
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		/*for(unsigned int i = 0; i < palmModel.meshes.size(); i++){
+			glBindVertexArray(palmModel.meshes[i].VAO);
+			glDrawElementsInstanced(GL_TRIANGLES, palmModel.meshes[i].indices.size(), GL_UNSIGNED_INT, 0, palmAmount);
+			glBindVertexArray(0);
+		}*/
 		
 		/////////////////// CAR /////////////////////////////////
 		
@@ -460,10 +527,10 @@ int main()
 		glm::mat4 carModelMatrix;
 		glm::mat3 carNormalMatrix;
 		// car engine tremble
-		float trembleSpeed = 100.0f;
-		float trembleTranslation = 0.005f;
-		float maxTurnAngle = 2.0f;
-		float turnSpeed = 40.0f;
+		GLfloat trembleSpeed = 100.0f;
+		GLfloat trembleTranslation = 0.005f;
+		GLfloat maxTurnAngle = 2.0f;
+		GLfloat turnSpeed = 40.0f;
 		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(std::cos(glfwGetTime() * trembleSpeed) * trembleTranslation, std::sin(glfwGetTime() * trembleSpeed) * trembleTranslation, 24.0f));
 		if(keys[GLFW_KEY_A] && carXPos >= (-streetBorder + 1.0f)){
 			carXPos -= deltaTime * 2.0f;
@@ -486,15 +553,41 @@ int main()
 		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(carXPos, 0.0f, 0.0f));
 		carModelMatrix = glm::rotate(carModelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		carModelMatrix = glm::rotate(carModelMatrix, glm::radians(carTurnAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        carModelMatrix = glm::scale(carModelMatrix, glm::vec3(1.005f, 1.005f, 1.005f));
+        carModelMatrix = glm::scale(carModelMatrix, glm::vec3(0.6f));
 		carNormalMatrix = glm::inverseTranspose(glm::mat3(view * carModelMatrix));
         glUniformMatrix4fv(glGetUniformLocation(car_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(carModelMatrix));
         glUniformMatrix3fv(glGetUniformLocation(car_shader.Program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(carNormalMatrix));
 		
 		carModel.Draw(car_shader);
 		
-        /////////////////// SKYBOX ////////////////////////////////////////////////
+		/////////////////// POWERUPS ///////////////////////////////
 		
+		full_color.Use();
+		
+		glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+		
+		modelMatrices = new glm::mat4[pwAmount];
+		
+		for(int i = 0; i < pwAmount; i++){
+			if(once){
+				pwXPositions[i] = (float)(rand()%((int)streetBorder+(int)streetBorder + 1) - (int)streetBorder);
+				respawnThreshold = rand() % (maxZ - minZ + 1) + minZ;
+			}
+			pwZPositions[i] += palmTranslationSpeed * deltaTime;
+			if(pwZPositions[i] > (float)respawnThreshold){
+				pwZPositions[i] = (float)(-(rand()%(maxZ-minZ + 1) + minZ));
+				pwXPositions[i] = (float)(rand()%(((int)streetBorder - 1) + ((int)streetBorder - 1) + 1) - ((int)streetBorder - 1));
+				respawnThreshold = rand() % (maxZ - (minZ - 45) + 1) + (minZ - 45);
+			}
+			modelMatrices[i] = glm::translate(modelMatrices[i], glm::vec3(pwXPositions[i], 0.5f, pwZPositions[i]));
+			modelMatrices[i] = glm::scale(modelMatrices[i], glm::vec3(0.3f));
+			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrices[i]));
+			sphereModel.Draw(full_color);
+		}
+		once = false;
+		
+        /////////////////// SKYBOX ////////////////////////////////////////////////
         glDepthFunc(GL_LEQUAL);
         skybox_shader.Use();
         // we activate the cube map
