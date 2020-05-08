@@ -54,7 +54,6 @@ positive Z axis points "outside" the screen
 #include <utils/shader_v1.h>
 #include <utils/model_v2.h>
 #include <utils/camera.h>
-#include <utils/physics_v1.h>
 
 // we load the GLM classes used in the application
 #include <glm/glm.hpp>
@@ -65,6 +64,16 @@ positive Z axis points "outside" the screen
 // we include the library for images loading
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
+
+struct PowerUp{
+	glm::vec3 position;
+	GLfloat radius;
+};
+
+struct Car{
+	glm::vec3 position;
+	glm::vec3 size;
+};
 
 // dimensions of application's window
 GLuint screenWidth = 1920, screenHeight = 1080;
@@ -101,6 +110,8 @@ void FrequencyBandsNormalize();
 void CreateBandsBuffer();
 // Stop all the current audio reproductions and start a new one
 void PlayMusic(string musicPath);
+// Collision check AABB - Sphere
+bool CheckCollision(PowerUp pwUp, Car car);
 
 // we initialize an array of booleans for each keybord key
 bool keys[1024];
@@ -169,8 +180,6 @@ vector<float> bandsBuffer;
 vector<float> bufferDecrease;
 // Initialization of irrKlang for audio reproduction
 irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
-// Instance of the physics class
-Physics collisionSimulation;
 
 /////////////////// MAIN function ///////////////////////
 int main()
@@ -314,21 +323,17 @@ int main()
 	GLuint pwAmount = 10;
 	GLint maxZ = 200;
 	GLint minZ = 75;
-	GLfloat pwZPositions[pwAmount];
-	GLfloat pwXPositions[pwAmount];
+	PowerUp powerUps[pwAmount];
 	GLint respawnThreshold;
 	for(int i = 0; i < pwAmount; i++){
-		pwZPositions[i] = 29.0f;
+		powerUps[i].position = glm::vec3(0.0f, 0.0f, 29.0f);
+		powerUps[i].radius = 1.0f;
 	}
-		
-	// Rigidbodies
-	glm::vec3 plane_pos = glm::vec3(0.0f, -0.5f, 0.0f);
-	glm::vec3 plane_size = glm::vec3(200.0f, 0.1f, 200.0f);
-	glm::vec3 plane_rot = glm::vec3(0.0f, 0.0f, 0.0f);
-	btRigidBody* planeRB = collisionSimulation.createRigidBody(BOX, plane_pos, plane_size, plane_rot, 0.0f, 0.3f, 0.3f);
 	
-	btRigidBody* carRB;
-	
+	Car countach;
+	GLfloat carScale = 0.6f;
+	countach.position = glm::vec3(0.0f, 0.0f, 24.0f);
+	countach.size = glm::vec3(1.4f * carScale, 1.2f * carScale, 4.4f * carScale);
 	
 	// Rendering loop: this code is executed at each frame
     while(!glfwWindowShouldClose(window))
@@ -351,7 +356,7 @@ int main()
 		// View matrix (=camera): position, view direction, camera "up" vector
         glm::mat4 view = camera.GetViewMatrix();
 		
-		// we "clear" the frame and z buffer
+		// we "clear" frame, z and stencil buffers
 		glStencilMask(~0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -528,17 +533,17 @@ int main()
 		glm::mat3 carNormalMatrix;
 		// car engine tremble
 		GLfloat trembleSpeed = 100.0f;
-		GLfloat trembleTranslation = 0.005f;
+		GLfloat trembleTranslation = 0.002f;
 		GLfloat maxTurnAngle = 2.0f;
 		GLfloat turnSpeed = 40.0f;
-		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(std::cos(glfwGetTime() * trembleSpeed) * trembleTranslation, std::sin(glfwGetTime() * trembleSpeed) * trembleTranslation, 24.0f));
-		if(keys[GLFW_KEY_A] && carXPos >= (-streetBorder + 1.0f)){
-			carXPos -= deltaTime * 2.0f;
+		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(std::cos(glfwGetTime() * trembleSpeed) * trembleTranslation, std::sin(glfwGetTime() * trembleSpeed) * trembleTranslation, countach.position.z));
+		if(keys[GLFW_KEY_A] && countach.position.x >= (-streetBorder + 1.0f)){
+			countach.position.x -= deltaTime * 2.0f;
 			if(carTurnAngle <= maxTurnAngle)
 				carTurnAngle += deltaTime * turnSpeed;
 		}
-		if(keys[GLFW_KEY_D] && carXPos <= (streetBorder - 1.0f)){
-			carXPos += deltaTime * 2.0f;
+		if(keys[GLFW_KEY_D] && countach.position.x <= (streetBorder - 1.0f)){
+			countach.position.x += deltaTime * 2.0f;
 			if(carTurnAngle >= -maxTurnAngle)
 				carTurnAngle -= deltaTime * turnSpeed;
 		}
@@ -550,10 +555,10 @@ int main()
 					carTurnAngle += deltaTime * turnSpeed;
 			}
 		}
-		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(carXPos, 0.0f, 0.0f));
+		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(countach.position.x, 0.0f, 0.0f));
 		carModelMatrix = glm::rotate(carModelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		carModelMatrix = glm::rotate(carModelMatrix, glm::radians(carTurnAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        carModelMatrix = glm::scale(carModelMatrix, glm::vec3(0.6f));
+        carModelMatrix = glm::scale(carModelMatrix, glm::vec3(carScale));
 		carNormalMatrix = glm::inverseTranspose(glm::mat3(view * carModelMatrix));
         glUniformMatrix4fv(glGetUniformLocation(car_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(carModelMatrix));
         glUniformMatrix3fv(glGetUniformLocation(car_shader.Program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(carNormalMatrix));
@@ -571,19 +576,22 @@ int main()
 		
 		for(int i = 0; i < pwAmount; i++){
 			if(once){
-				pwXPositions[i] = (float)(rand()%((int)streetBorder+(int)streetBorder + 1) - (int)streetBorder);
+				powerUps[i].position.x = (GLfloat)(rand()%((GLint)streetBorder+(GLint)streetBorder + 1) - (GLint)streetBorder);
 				respawnThreshold = rand() % (maxZ - minZ + 1) + minZ;
 			}
-			pwZPositions[i] += palmTranslationSpeed * deltaTime;
-			if(pwZPositions[i] > (float)respawnThreshold){
-				pwZPositions[i] = (float)(-(rand()%(maxZ-minZ + 1) + minZ));
-				pwXPositions[i] = (float)(rand()%(((int)streetBorder - 1) + ((int)streetBorder - 1) + 1) - ((int)streetBorder - 1));
+			powerUps[i].position.z += palmTranslationSpeed * deltaTime;
+			if(powerUps[i].position.z > (GLfloat)respawnThreshold){
+				powerUps[i].position.z = (GLfloat)(-(rand()%(maxZ-minZ + 1) + minZ));
+				powerUps[i].position.x = (GLfloat)(rand()%(((GLint)streetBorder - 1) + ((GLint)streetBorder - 1) + 1) - ((GLint)streetBorder - 1));
 				respawnThreshold = rand() % (maxZ - (minZ - 45) + 1) + (minZ - 45);
 			}
-			modelMatrices[i] = glm::translate(modelMatrices[i], glm::vec3(pwXPositions[i], 0.5f, pwZPositions[i]));
+			modelMatrices[i] = glm::translate(modelMatrices[i], powerUps[i].position);
 			modelMatrices[i] = glm::scale(modelMatrices[i], glm::vec3(0.3f));
 			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrices[i]));
 			sphereModel.Draw(full_color);
+			if(CheckCollision(powerUps[i], countach)){
+				printf("HIT!");
+			}
 		}
 		once = false;
 		
@@ -1037,4 +1045,14 @@ void PlayMusic(string musicPath)
 {
 	soundEngine->stopAllSounds();
 	soundEngine->play2D(musicPath.c_str(), true);
+}
+
+bool CheckCollision(PowerUp pwUp, Car car){
+	glm::vec3 aabb_half_extents(car.size.x / 2.0f, car.size.y / 2.0f, car.size.z / 2.0f);
+	glm::vec3 difference = pwUp.position - car.position;
+	glm::vec3 clamped = glm::clamp(difference, -aabb_half_extents, aabb_half_extents);
+	
+	glm::vec3 closest = car.position + clamped;
+	difference = closest - pwUp.position;
+	return glm::length(difference) < pwUp.radius;
 }
