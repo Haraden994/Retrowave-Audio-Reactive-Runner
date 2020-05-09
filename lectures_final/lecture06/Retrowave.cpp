@@ -68,6 +68,8 @@ positive Z axis points "outside" the screen
 struct PowerUp{
 	glm::vec3 position;
 	GLfloat radius;
+	bool speedUp;
+	bool hit;
 };
 
 struct Car{
@@ -143,8 +145,9 @@ GLfloat gridScrollSpeed = 0.0f;
 GLfloat gridSize = 0.1f;
 GLfloat gridNoiseZoom = 10.0f;
 GLfloat gridDisplacementPower = 40.0f;
-GLfloat streetSize = 0.04f;
+GLfloat streetSize = 0.1f;
 GLfloat fadeAfterStreet = 0.1f;
+GLfloat palmOutline[] = {0.0f, 1.0, 1.0f};
 // uniforms for light calculations
 GLfloat diffuseColor[] = {1.0f, 0.17, 0.6};
 GLfloat specularColor[] = {0.0f, 1.0f, 1.0f};
@@ -284,6 +287,8 @@ int main()
 	shaders.push_back(full_color);
 	Shader car_shader("13_phong.vert", "14_ggx.frag");
 	shaders.push_back(car_shader);
+	Shader pwUp_shader("powerUp.vert", "../powerUp.geom", "palmOutline.frag");
+	shaders.push_back(pwUp_shader);
 	
 	// we load the cube map (we pass the path to the folder containing the 6 views)
     textureCube = LoadTextureCube("../../../textures/cube/Purple/");
@@ -325,15 +330,22 @@ int main()
 	GLint minZ = 75;
 	PowerUp powerUps[pwAmount];
 	GLint respawnThreshold;
+	GLfloat sphereScale = 0.3f;
 	for(int i = 0; i < pwAmount; i++){
 		powerUps[i].position = glm::vec3(0.0f, 0.0f, 29.0f);
-		powerUps[i].radius = 1.0f;
+		powerUps[i].radius = sphereScale;
+		if(i % 2 == 0)
+			powerUps[i].speedUp = true;
+		else
+			powerUps[i].speedUp = false;
+			
+		powerUps[i].hit = false;
 	}
 	
 	Car countach;
 	GLfloat carScale = 0.6f;
 	countach.position = glm::vec3(0.0f, 0.0f, 24.0f);
-	countach.size = glm::vec3(1.4f * carScale, 1.2f * carScale, 4.4f * carScale);
+	countach.size = glm::vec3(1.4f * carScale, 1.2f * carScale, 4.3f * carScale);
 	
 	// Rendering loop: this code is executed at each frame
     while(!glfwWindowShouldClose(window))
@@ -488,7 +500,7 @@ int main()
 			glUniform1f(glGetUniformLocation(palm_shader.Program, "linear"), linear);
 			glUniform1f(glGetUniformLocation(palm_shader.Program, "quadratic"), quadratic);
 			glUniform1f(glGetUniformLocation(palm_shader.Program, "shininess"), shininess);
-		
+			
 			glUniformMatrix4fv(glGetUniformLocation(palm_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrices[i]));
 			glUniformMatrix3fv(glGetUniformLocation(palm_shader.Program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrices[i]));
 			palmModel.Draw(palm_shader);
@@ -500,6 +512,8 @@ int main()
 			
 			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
 			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+			glUniform3fv(glGetUniformLocation(full_color.Program, "color"), 1, palmOutline);
+			
 			glm::mat4 palmModelMatrix = modelMatrices[i];
 			palmModelMatrix = glm::translate(palmModelMatrix, glm::vec3(0.0f, -2.0f, 0.0f));
 			palmModelMatrix = glm::scale(palmModelMatrix, glm::vec3(1.1f));
@@ -535,7 +549,7 @@ int main()
 		GLfloat trembleSpeed = 100.0f;
 		GLfloat trembleTranslation = 0.002f;
 		GLfloat maxTurnAngle = 2.0f;
-		GLfloat turnSpeed = 40.0f;
+		GLfloat turnSpeed = 60.0f;
 		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(std::cos(glfwGetTime() * trembleSpeed) * trembleTranslation, std::sin(glfwGetTime() * trembleSpeed) * trembleTranslation, countach.position.z));
 		if(keys[GLFW_KEY_A] && countach.position.x >= (-streetBorder + 1.0f)){
 			countach.position.x -= deltaTime * 2.0f;
@@ -566,31 +580,44 @@ int main()
 		carModel.Draw(car_shader);
 		
 		/////////////////// POWERUPS ///////////////////////////////
+		pwUp_shader.Use();
 		
-		full_color.Use();
+		glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 		
-		glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniform1f(glGetUniformLocation(pwUp_shader.Program, "time"), glfwGetTime());
+
 		
 		modelMatrices = new glm::mat4[pwAmount];
 		
 		for(int i = 0; i < pwAmount; i++){
+			if(powerUps[i].speedUp)
+				glUniform3f(glGetUniformLocation(pwUp_shader.Program, "color"), 0.0f, 1.0f, 1.0f);
+			else
+				glUniform3f(glGetUniformLocation(pwUp_shader.Program, "color"), 1.0f, 0.0f, 0.0f);
 			if(once){
 				powerUps[i].position.x = (GLfloat)(rand()%((GLint)streetBorder+(GLint)streetBorder + 1) - (GLint)streetBorder);
 				respawnThreshold = rand() % (maxZ - minZ + 1) + minZ;
 			}
 			powerUps[i].position.z += palmTranslationSpeed * deltaTime;
 			if(powerUps[i].position.z > (GLfloat)respawnThreshold){
+				powerUps[i].hit = false;
 				powerUps[i].position.z = (GLfloat)(-(rand()%(maxZ-minZ + 1) + minZ));
 				powerUps[i].position.x = (GLfloat)(rand()%(((GLint)streetBorder - 1) + ((GLint)streetBorder - 1) + 1) - ((GLint)streetBorder - 1));
 				respawnThreshold = rand() % (maxZ - (minZ - 45) + 1) + (minZ - 45);
 			}
 			modelMatrices[i] = glm::translate(modelMatrices[i], powerUps[i].position);
-			modelMatrices[i] = glm::scale(modelMatrices[i], glm::vec3(0.3f));
-			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrices[i]));
-			sphereModel.Draw(full_color);
-			if(CheckCollision(powerUps[i], countach)){
-				printf("HIT!");
+			modelMatrices[i] = glm::scale(modelMatrices[i], glm::vec3(sphereScale));
+			glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrices[i]));
+			sphereModel.Draw(pwUp_shader);
+			// Collision check for each powerup
+			if(!powerUps[i].hit && CheckCollision(powerUps[i], countach)){
+				powerUps[i].hit = true;
+				if(powerUps[i].speedUp)
+					gridScrollSpeed += gridScrollSpeed * 0.05f;
+				else
+					gridScrollSpeed -= gridScrollSpeed * 0.1f;
+				// PARTE L'ANIMAZIONE DA SHADER
 			}
 		}
 		once = false;
@@ -1049,10 +1076,14 @@ void PlayMusic(string musicPath)
 
 bool CheckCollision(PowerUp pwUp, Car car){
 	glm::vec3 aabb_half_extents(car.size.x / 2.0f, car.size.y / 2.0f, car.size.z / 2.0f);
+	// Distance vector between AABB and Sphere centers
 	glm::vec3 difference = pwUp.position - car.position;
+	// clamped vector used to get the AABB's closest point to the sphere
 	glm::vec3 clamped = glm::clamp(difference, -aabb_half_extents, aabb_half_extents);
-	
+	// Position of the AABB's closest point to the sphere
 	glm::vec3 closest = car.position + clamped;
+	// the new distance vector between AABB's closest point and the Sphere's center
 	difference = closest - pwUp.position;
+	// Collision check
 	return glm::length(difference) < pwUp.radius;
 }

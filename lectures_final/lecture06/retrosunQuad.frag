@@ -27,9 +27,7 @@ float line(float center, float size, float edge, float y) {
 }
 
 void main()
-{
-    vec2 texelSize = vec2(1.0 / interp_UV.x, 1.0 / interp_UV.y);
-    
+{    
     float sunPct = circle(interp_UV, 0.5, 0.04);
     
     // sun haze
