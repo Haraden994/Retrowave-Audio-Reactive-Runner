@@ -143,7 +143,7 @@ vector<Shader> shaders;
 // Uniforms to be passed to shaders
 GLfloat sunAnimationSpeed = 2.0f;
 GLfloat sunSize = 7.0f;
-GLfloat gridScrollSpeed = 0.0f;
+GLfloat gridScrollSpeed = 40.0f;
 GLfloat gridSize = 0.1f;
 GLfloat gridNoiseZoom = 10.0f;
 GLfloat gridDisplacementPower = 40.0f;
