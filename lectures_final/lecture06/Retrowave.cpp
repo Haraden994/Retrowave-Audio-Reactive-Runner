@@ -537,6 +537,9 @@ int main()
 		
 		car_shader.Use();
 		
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+		
 		glUniformMatrix4fv(glGetUniformLocation(car_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(car_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 		
@@ -582,6 +585,25 @@ int main()
 		
 		carModel.Draw(car_shader);
 		
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		
+		full_color.Use();
+		
+		glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+		
+		glUniform3fv(glGetUniformLocation(full_color.Program, "color"), 1, palmOutline);
+		
+		glm::mat4 carOutlineModelMatrix = carModelMatrix;
+		carOutlineModelMatrix = glm::translate(carOutlineModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+		carOutlineModelMatrix = glm::scale(carOutlineModelMatrix, glm::vec3(1.1f));
+		glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(carOutlineModelMatrix));
+		
+		carModel.Draw(full_color);
+		
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	
 		/////////////////// POWERUPS ///////////////////////////////
 		pwUp_shader.Use();
 		
