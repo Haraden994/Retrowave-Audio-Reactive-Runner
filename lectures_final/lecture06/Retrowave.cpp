@@ -70,6 +70,8 @@ struct PowerUp{
 	GLfloat radius;
 	bool speedUp;
 	bool hit;
+	GLint explodeValue;
+	GLfloat explosionStartTime;
 };
 
 struct Car{
@@ -338,8 +340,9 @@ int main()
 			powerUps[i].speedUp = true;
 		else
 			powerUps[i].speedUp = false;
-			
+		powerUps[i].explodeValue = 0;
 		powerUps[i].hit = false;
+		powerUps[i].explosionStartTime = 0.0f;
 	}
 	
 	Car countach;
@@ -549,7 +552,7 @@ int main()
 		GLfloat trembleSpeed = 100.0f;
 		GLfloat trembleTranslation = 0.002f;
 		GLfloat maxTurnAngle = 2.0f;
-		GLfloat turnSpeed = 60.0f;
+		GLfloat turnSpeed = 100.0f + gridScrollSpeed * 0.1f;
 		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(std::cos(glfwGetTime() * trembleSpeed) * trembleTranslation, std::sin(glfwGetTime() * trembleSpeed) * trembleTranslation, countach.position.z));
 		if(keys[GLFW_KEY_A] && countach.position.x >= (-streetBorder + 1.0f)){
 			countach.position.x -= deltaTime * 2.0f;
@@ -585,9 +588,6 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 		
-		glUniform1f(glGetUniformLocation(pwUp_shader.Program, "time"), glfwGetTime());
-
-		
 		modelMatrices = new glm::mat4[pwAmount];
 		
 		for(int i = 0; i < pwAmount; i++){
@@ -595,6 +595,10 @@ int main()
 				glUniform3f(glGetUniformLocation(pwUp_shader.Program, "color"), 0.0f, 1.0f, 1.0f);
 			else
 				glUniform3f(glGetUniformLocation(pwUp_shader.Program, "color"), 1.0f, 0.0f, 0.0f);
+				
+			glUniform1f(glGetUniformLocation(pwUp_shader.Program, "time"), glfwGetTime() - powerUps[i].explosionStartTime);
+			glUniform1i(glGetUniformLocation(pwUp_shader.Program, "explodeValue"), powerUps[i].explodeValue);
+			
 			if(once){
 				powerUps[i].position.x = (GLfloat)(rand()%((GLint)streetBorder+(GLint)streetBorder + 1) - (GLint)streetBorder);
 				respawnThreshold = rand() % (maxZ - minZ + 1) + minZ;
@@ -602,6 +606,7 @@ int main()
 			powerUps[i].position.z += palmTranslationSpeed * deltaTime;
 			if(powerUps[i].position.z > (GLfloat)respawnThreshold){
 				powerUps[i].hit = false;
+				powerUps[i].explodeValue = 0;
 				powerUps[i].position.z = (GLfloat)(-(rand()%(maxZ-minZ + 1) + minZ));
 				powerUps[i].position.x = (GLfloat)(rand()%(((GLint)streetBorder - 1) + ((GLint)streetBorder - 1) + 1) - ((GLint)streetBorder - 1));
 				respawnThreshold = rand() % (maxZ - (minZ - 45) + 1) + (minZ - 45);
@@ -617,8 +622,10 @@ int main()
 					gridScrollSpeed += gridScrollSpeed * 0.05f;
 				else
 					gridScrollSpeed -= gridScrollSpeed * 0.1f;
-				// PARTE L'ANIMAZIONE DA SHADER
+				powerUps[i].explodeValue = 1;
+				powerUps[i].explosionStartTime = glfwGetTime();
 			}
+
 		}
 		once = false;
 		

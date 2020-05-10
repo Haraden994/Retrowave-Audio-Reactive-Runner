@@ -10,15 +10,14 @@ uniform mat4 projectionMatrix;
 uniform mat4 modelMatrix;
 
 uniform float time;
+uniform int explodeValue;
 
 out vec2 interp_UV;
 
-uniform bool start;
-
 vec4 Explode(vec4 position, vec3 normal)
 {
-    float magnitude = 2.0;
-    vec3 direction = normal * ((sin(time) + 1.0) / 2.0) * magnitude; 
+    float magnitude = 10.0;
+    vec3 direction = normal * explodeValue * time * magnitude;
     return position + vec4(direction, 0.0);
 } 
 
