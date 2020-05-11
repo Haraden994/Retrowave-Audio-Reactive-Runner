@@ -347,7 +347,7 @@ int main()
 	
 	Car countach;
 	GLfloat carScale = 0.6f;
-	countach.position = glm::vec3(0.0f, 0.0f, 24.0f);
+	countach.position = glm::vec3(0.0f, 0.0f, 19.0f);
 	countach.size = glm::vec3(1.4f * carScale, 1.2f * carScale, 4.3f * carScale);
 	
 	// Rendering loop: this code is executed at each frame
@@ -545,7 +545,7 @@ int main()
 		
 		glUniform3fv(glGetUniformLocation(car_shader.Program, "pointLightPosition"), 1, glm::value_ptr(lightPosition));
 		glUniform3fv(glGetUniformLocation(car_shader.Program, "diffuseColor"), 1, diffuseColor);
-		glUniform1f(glGetUniformLocation(car_shader.Program, "Kd"), diffuse);
+		glUniform1f(glGetUniformLocation(car_shader.Program, "Kd"), 0.0f);
 		glUniform1f(glGetUniformLocation(car_shader.Program, "alpha"), 0.2f);
 		glUniform1f(glGetUniformLocation(car_shader.Program, "F0"), 0.9f);
 		
@@ -596,8 +596,8 @@ int main()
 		glUniform3fv(glGetUniformLocation(full_color.Program, "color"), 1, palmOutline);
 		
 		glm::mat4 carOutlineModelMatrix = carModelMatrix;
-		carOutlineModelMatrix = glm::translate(carOutlineModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
-		carOutlineModelMatrix = glm::scale(carOutlineModelMatrix, glm::vec3(1.1f));
+		//carOutlineModelMatrix = glm::translate(carOutlineModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+		carOutlineModelMatrix = glm::scale(carOutlineModelMatrix, glm::vec3(1.05f));
 		glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(carOutlineModelMatrix));
 		
 		carModel.Draw(full_color);

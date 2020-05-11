@@ -5,8 +5,8 @@
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
       <wxString Value="C:\Users\andre\Desktop\RTGP\lectures_final\lecture06\Retrowave.cpp" Name="FileName"/>
-      <int Value="578" Name="FirstVisibleLine"/>
-      <int Value="598" Name="CurrentLine"/>
+      <int Value="467" Name="FirstVisibleLine"/>
+      <int Value="349" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>

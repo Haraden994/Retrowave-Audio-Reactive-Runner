@@ -1,7 +1,7 @@
 #version 330 core
 
 layout (triangles) in;
-layout (triangle_strip, max_vertices = 200) out;
+layout (triangle_strip, max_vertices = 12) out;
 
 in vec2 UV[];
 in vec3 vertexNormal[];
@@ -15,7 +15,7 @@ uniform int explodeValue;
 
 out vec2 interp_UV;
 
-float magnitude = 8.0;
+float magnitude = 20.0;
 
 void NewVertex(vec4 center, vec3 offset){
 	vec4 newVertexPos = projectionMatrix * viewMatrix * modelMatrix * (center + vec4(offset * 0.2, 0.0));
@@ -30,7 +30,7 @@ vec4 Explode(vec4 position, vec3 normal)
 } 
 
 void Implode(int vertex){
-	vec4 center = gl_in[vertex].gl_Position + vec4(vertexNormal[vertex] * -explodeValue * time * magnitude, 0.0);
+	vec4 center = gl_in[vertex].gl_Position + vec4(vertexNormal[vertex] * -explodeValue * time * magnitude * 0.8, 0.0);
 	
 	NewVertex(center, vec3(-1.0, -1.0, 0.0));
 	NewVertex(center, vec3(1.0, -1.0, 0.0));
