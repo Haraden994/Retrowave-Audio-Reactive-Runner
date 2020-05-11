@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Session Name="C:\Users\andre\Desktop\RTGP\LezioniRTGP_win.workspace">
+<Session Name="C:\Users\night\Desktop\RTGP\LezioniRTGP_win.workspace">
   <int Value="0" Name="m_selectedTab"/>
-  <wxString Value="C:\Users\andre\Desktop\RTGP\LezioniRTGP_win.workspace" Name="m_workspaceName"/>
+  <wxString Value="C:\Users\night\Desktop\RTGP\LezioniRTGP_win.workspace" Name="m_workspaceName"/>
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
-      <wxString Value="C:\Users\andre\Desktop\RTGP\lectures_final\lecture06\Retrowave.cpp" Name="FileName"/>
-      <int Value="467" Name="FirstVisibleLine"/>
-      <int Value="349" Name="CurrentLine"/>
+      <wxString Value="C:\Users\night\Desktop\RTGP\lectures_final\lecture06\Retrowave.cpp" Name="FileName"/>
+      <int Value="679" Name="FirstVisibleLine"/>
+      <int Value="696" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="C:\Users\night\Desktop\RTGP\include\glfw\glfw3.h" Name="FileName"/>
+      <int Value="3704" Name="FirstVisibleLine"/>
+      <int Value="3737" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="c:\MinGW\include\stdlib.h" Name="FileName"/>
+      <int Value="462" Name="FirstVisibleLine"/>
+      <int Value="480" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="C:\Users\night\Desktop\RTGP\include\utils\camera.h" Name="FileName"/>
+      <int Value="94" Name="FirstVisibleLine"/>
+      <int Value="103" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
@@ -14,5 +35,5 @@
   <SerializedObject Name="m_breakpoints">
     <long Value="0" Name="Count"/>
   </SerializedObject>
-  <wxString Value="*.c;*.cpp;*.cxx;*.cc;*.h;*.hpp;*.inc;*.mm;*.m;*.xrc;*.plist;*.txt" Name="m_findInFilesMask"/>
+  <wxString Value="*.c;*.cpp;*.cxx;*.cc;*.h;*.hpp;*.inc;*.mm;*.m;*.xrc;*.xml;*.json;*.sql;*.txt;*.plist;CMakeLists.txt;*.rc;*.iss" Name="m_findInFilesMask"/>
 </Session>

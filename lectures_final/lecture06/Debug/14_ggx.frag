@@ -31,6 +31,7 @@ uniform vec3 diffuseColor;
 uniform float alpha; // rugosity - 0 : smooth, 1: rough
 uniform float F0; // fresnel reflectance at normal incidence
 uniform float Kd; // weight of diffuse reflection
+uniform vec3 specularColor;
 
 float G1(float angle, float alpha)
 {
@@ -100,7 +101,7 @@ void main()
     //integral of: BRDF * Li * (cosine angle between N and L)
     // BRDF in our case is: the sum of Lambert and GGX
     // Li is considered as equal to 1: light is white, and we have not applied attenuation. With colored lights, and with attenuation, the code must be modified and the Li factor must be multiplied to finalColor
-    vec3 finalColor = (lambert + specular)*NdotL;
+    vec3 finalColor = (lambert + specular) * specularColor * NdotL;
 
 
     colorFrag = vec4(finalColor, 1.0);

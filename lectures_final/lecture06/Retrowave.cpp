@@ -136,23 +136,28 @@ int remainingFrames = 0;
 // boolean to activate/deactivate wireframe rendering
 GLboolean wireframe = GL_FALSE;
 GLboolean mouseEnabled = GL_FALSE;
+GLboolean freeCamera = GL_FALSE;
 
 // a vector for all the Shader Programs used in the application
 vector<Shader> shaders;
 
 // Uniforms to be passed to shaders
-GLfloat sunAnimationSpeed = 2.0f;
-GLfloat sunSize = 7.0f;
-GLfloat gridScrollSpeed = 40.0f;
+GLfloat sunAnimationSpeed = 3.0f;
+GLfloat sunSize = 14.0f;
+GLfloat gridScrollSpeed = 20.0f;
 GLfloat gridSize = 0.1f;
 GLfloat gridNoiseZoom = 10.0f;
 GLfloat gridDisplacementPower = 40.0f;
 GLfloat streetSize = 0.1f;
 GLfloat fadeAfterStreet = 0.1f;
-GLfloat palmOutline[] = {0.0f, 1.0, 1.0f};
+GLfloat palmOutline[] = {0.0f, 1.0f, 1.0f};
+GLfloat carOutline[] = {0.0f, 1.0f, 1.0f};
+glm::vec3 pwUpOutline;
+GLint blink = 0;
 // uniforms for light calculations
 GLfloat diffuseColor[] = {1.0f, 0.17, 0.6};
 GLfloat specularColor[] = {0.0f, 1.0f, 1.0f};
+GLfloat carSpecularColor[] = {0.0f, 1.0f, 1.0f};
 GLfloat ambientColor[] = {1.0f, 0.0f, 1.0f};
 // diffuse, specular and ambient weights for Blinn-Phong lighting shader
 GLfloat diffuse = 1.0f;
@@ -160,7 +165,7 @@ GLfloat specular = 0.6f;
 GLfloat ambient = 0.3f;
 // attenuation parameters
 GLfloat constant = 1.0f;
-GLfloat linear = 0.04f;
+GLfloat linear = 0.001f;
 GLfloat quadratic = 0.00f;
 // shininess coefficient
 GLfloat shininess = 25.0f;
@@ -168,12 +173,16 @@ GLfloat shininess = 25.0f;
 // Variables
 bool once = true;
 string musicPath = "../../../Music/SneakyDriver_KatanaZeroOST.wav";
+string speedUpSFX = "../../../SFX/speedUpSFX.wav";
+string speedDownSFX = "../../../SFX/speedDownSFX.wav";
 GLfloat bufferDecreaseAmount = 0.00005f;
-GLfloat sunPosition[] = {0.0f, 5.0f, -25.0f};
+GLfloat sunPosition[] = {0.0f, 23.0f, -100.0f};
 glm::vec3 lightPosition = glm::vec3(sunPosition[0], sunPosition[1], sunPosition[2]);
 GLfloat carXPos = 0.0f;
 GLfloat carTurnAngle = 0.0f;
 GLfloat streetBorder = (streetSize*100.0f) / 2.0f;
+GLfloat blinkStart;
+GLfloat blinkDuration = 0.8f;
 
 // texture unit for the cube map
 GLuint textureCube;
@@ -285,11 +294,11 @@ int main()
 	shaders.push_back(qSun_shader);
 	Shader palm_shader("palm.vert", "palm.frag");
 	shaders.push_back(palm_shader);
-	Shader full_color("palmOutline.vert", "palmOutline.frag");
+	Shader full_color("outline.vert", "outline.frag");
 	shaders.push_back(full_color);
-	Shader car_shader("13_phong.vert", "14_ggx.frag");
+	Shader car_shader("13_phong.vert", "carGGX.frag");
 	shaders.push_back(car_shader);
-	Shader pwUp_shader("powerUp.vert", "../powerUp.geom", "palmOutline.frag");
+	Shader pwUp_shader("powerUp.vert", "../powerUp.geom", "powerUp.frag");
 	shaders.push_back(pwUp_shader);
 	
 	// we load the cube map (we pass the path to the folder containing the 6 views)
@@ -367,7 +376,8 @@ int main()
         // Check is an I/O event is happening
         glfwPollEvents();
 		// we apply FPS camera movements
-        apply_camera_movements();
+		if(freeCamera)
+			apply_camera_movements();
 		// View matrix (=camera): position, view direction, camera "up" vector
         glm::mat4 view = camera.GetViewMatrix();
 		
@@ -515,8 +525,11 @@ int main()
 			
 			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
 			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
-			glUniform3fv(glGetUniformLocation(full_color.Program, "color"), 1, palmOutline);
 			
+			glUniform3fv(glGetUniformLocation(full_color.Program, "color"), 1, palmOutline);
+			glUniform1i(glGetUniformLocation(full_color.Program, "blink"), 0);
+			glUniform1f(glGetUniformLocation(full_color.Program, "time"), glfwGetTime());
+
 			glm::mat4 palmModelMatrix = modelMatrices[i];
 			palmModelMatrix = glm::translate(palmModelMatrix, glm::vec3(0.0f, -2.0f, 0.0f));
 			palmModelMatrix = glm::scale(palmModelMatrix, glm::vec3(1.1f));
@@ -545,9 +558,13 @@ int main()
 		
 		glUniform3fv(glGetUniformLocation(car_shader.Program, "pointLightPosition"), 1, glm::value_ptr(lightPosition));
 		glUniform3fv(glGetUniformLocation(car_shader.Program, "diffuseColor"), 1, diffuseColor);
+		glUniform3fv(glGetUniformLocation(car_shader.Program, "specularColor"), 1, carSpecularColor);
 		glUniform1f(glGetUniformLocation(car_shader.Program, "Kd"), 0.0f);
 		glUniform1f(glGetUniformLocation(car_shader.Program, "alpha"), 0.2f);
 		glUniform1f(glGetUniformLocation(car_shader.Program, "F0"), 0.9f);
+		
+		glUniform1f(glGetUniformLocation(car_shader.Program, "time"), glfwGetTime());
+		glUniform1i(glGetUniformLocation(car_shader.Program, "blink"), blink);
 		
 		glm::mat4 carModelMatrix;
 		glm::mat3 carNormalMatrix;
@@ -555,24 +572,27 @@ int main()
 		GLfloat trembleSpeed = 100.0f;
 		GLfloat trembleTranslation = 0.002f;
 		GLfloat maxTurnAngle = 2.0f;
-		GLfloat turnSpeed = 100.0f + gridScrollSpeed * 0.1f;
+		GLfloat rotationSpeed = 100.0f + gridScrollSpeed * 0.1f;
+		GLfloat turnSpeed = 2.0f + gridScrollSpeed * 0.05f;
 		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(std::cos(glfwGetTime() * trembleSpeed) * trembleTranslation, std::sin(glfwGetTime() * trembleSpeed) * trembleTranslation, countach.position.z));
-		if(keys[GLFW_KEY_A] && countach.position.x >= (-streetBorder + 1.0f)){
-			countach.position.x -= deltaTime * 2.0f;
-			if(carTurnAngle <= maxTurnAngle)
-				carTurnAngle += deltaTime * turnSpeed;
-		}
-		if(keys[GLFW_KEY_D] && countach.position.x <= (streetBorder - 1.0f)){
-			countach.position.x += deltaTime * 2.0f;
-			if(carTurnAngle >= -maxTurnAngle)
-				carTurnAngle -= deltaTime * turnSpeed;
-		}
-		if(!keys[GLFW_KEY_A] && !keys[GLFW_KEY_D]){
-			if(carTurnAngle != 0.0f){
-				if(carTurnAngle >= 0.0f)
-					carTurnAngle -= deltaTime * turnSpeed;
-				else if(carTurnAngle <= 0.0f)
-					carTurnAngle += deltaTime * turnSpeed;
+		if(!freeCamera){
+			if(keys[GLFW_KEY_A] && countach.position.x >= (-streetBorder + 1.0f)){
+				countach.position.x -= deltaTime * turnSpeed;
+				if(carTurnAngle <= maxTurnAngle)
+					carTurnAngle += deltaTime * rotationSpeed;
+			}
+			if(keys[GLFW_KEY_D] && countach.position.x <= (streetBorder - 1.0f)){
+				countach.position.x += deltaTime * turnSpeed;
+				if(carTurnAngle >= -maxTurnAngle)
+					carTurnAngle -= deltaTime * rotationSpeed;
+			}
+			if(!keys[GLFW_KEY_A] && !keys[GLFW_KEY_D]){
+				if(carTurnAngle != 0.0f){
+					if(carTurnAngle >= 0.0f)
+						carTurnAngle -= deltaTime * rotationSpeed;
+					else if(carTurnAngle <= 0.0f)
+						carTurnAngle += deltaTime * rotationSpeed;
+				}
 			}
 		}
 		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(countach.position.x, 0.0f, 0.0f));
@@ -593,7 +613,9 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 		
-		glUniform3fv(glGetUniformLocation(full_color.Program, "color"), 1, palmOutline);
+		glUniform3fv(glGetUniformLocation(full_color.Program, "color"), 1, carOutline);
+		glUniform1i(glGetUniformLocation(full_color.Program, "blink"), blink);
+		glUniform1f(glGetUniformLocation(full_color.Program, "time"), glfwGetTime());
 		
 		glm::mat4 carOutlineModelMatrix = carModelMatrix;
 		//carOutlineModelMatrix = glm::translate(carOutlineModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
@@ -605,19 +627,26 @@ int main()
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 	
 		/////////////////// POWERUPS ///////////////////////////////
-		pwUp_shader.Use();
-		
-		glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 		
 		modelMatrices = new glm::mat4[pwAmount];
 		
 		for(int i = 0; i < pwAmount; i++){
-			if(powerUps[i].speedUp)
-				glUniform3f(glGetUniformLocation(pwUp_shader.Program, "color"), 0.0f, 1.0f, 1.0f);
-			else
-				glUniform3f(glGetUniformLocation(pwUp_shader.Program, "color"), 1.0f, 0.0f, 0.0f);
-				
+			pwUp_shader.Use();
+		
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
+			
+			glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
+			glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+			
+			if(powerUps[i].speedUp){
+				glUniform1f(glGetUniformLocation(pwUp_shader.Program, "u_time"), glfwGetTime());
+				pwUpOutline = glm::vec3(0.0f, 1.0f, 0.0f);
+			}
+			else{
+				glUniform1f(glGetUniformLocation(pwUp_shader.Program, "u_time"), -glfwGetTime());
+				pwUpOutline = glm::vec3(1.0f, 0.0f, 0.0f);
+			}
 			glUniform1f(glGetUniformLocation(pwUp_shader.Program, "time"), glfwGetTime() - powerUps[i].explosionStartTime);
 			glUniform1i(glGetUniformLocation(pwUp_shader.Program, "explodeValue"), powerUps[i].explodeValue);
 			
@@ -636,18 +665,55 @@ int main()
 			modelMatrices[i] = glm::translate(modelMatrices[i], powerUps[i].position);
 			modelMatrices[i] = glm::scale(modelMatrices[i], glm::vec3(sphereScale));
 			glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrices[i]));
+			
 			sphereModel.Draw(pwUp_shader);
+			
+			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+			glStencilMask(0x00);
+			
+			full_color.Use();
+		
+			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
+			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+			
+			glUniform3fv(glGetUniformLocation(full_color.Program, "color"), 1, glm::value_ptr(pwUpOutline));
+			glUniform1i(glGetUniformLocation(full_color.Program, "blink"), 0);
+			glUniform1f(glGetUniformLocation(full_color.Program, "time"), glfwGetTime());
+			
+			glm::mat4 pwUpModelMatrix = modelMatrices[i];
+			//pwUpModelMatrix = glm::translate(pwUpModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+			pwUpModelMatrix = glm::scale(pwUpModelMatrix, glm::vec3(1.05f));
+			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(pwUpModelMatrix));
+			
+			if(!powerUps[i].hit)
+				sphereModel.Draw(full_color);
+			
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			
 			// Collision check for each powerup
 			if(!powerUps[i].hit && CheckCollision(powerUps[i], countach)){
 				powerUps[i].hit = true;
-				if(powerUps[i].speedUp)
-					gridScrollSpeed += gridScrollSpeed * 0.05f;
-				else
-					gridScrollSpeed -= gridScrollSpeed * 0.1f;
+				if(powerUps[i].speedUp){
+					gridScrollSpeed += gridScrollSpeed * 0.1f;
+					soundEngine->play2D(speedUpSFX.c_str(), false);
+					blink = 1;
+				}
+				else{
+					gridScrollSpeed -= gridScrollSpeed * 0.2f;
+					if(gridScrollSpeed < 5.0f)
+						gridScrollSpeed = 5.0f;
+					soundEngine->play2D(speedDownSFX.c_str(), false);
+					blink = -1;
+				}
+				blinkStart = glfwGetTime();
 				powerUps[i].explodeValue = 1;
 				powerUps[i].explosionStartTime = glfwGetTime();
 			}
-
+			
+			// turn off the car blink after blinkDuration seconds
+			if(blink != 0 && glfwGetTime() - blinkStart > blinkDuration){
+				blink = 0;
+			}
 		}
 		once = false;
 		
@@ -824,6 +890,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		else
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
+	
+	if(key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS){
+		freeCamera=!freeCamera;
+	}
 
 	// we keep trace of the pressed keys
     // with this method, we can manage 2 keys pressed at the same time:
@@ -844,10 +914,10 @@ void apply_camera_movements()
         camera.ProcessKeyboard(FORWARD, deltaTime * speed);
     if(keys[GLFW_KEY_S])
         camera.ProcessKeyboard(BACKWARD, deltaTime * speed);
-    /*if(keys[GLFW_KEY_A])
+    if(keys[GLFW_KEY_A])
         camera.ProcessKeyboard(LEFT, deltaTime * speed);
     if(keys[GLFW_KEY_D])
-        camera.ProcessKeyboard(RIGHT, deltaTime * speed);*/
+        camera.ProcessKeyboard(RIGHT, deltaTime * speed);
 }
 
 //////////////////////////////////////////
@@ -900,7 +970,8 @@ void DrawGUI()
 	
 	ImGui::Begin("GeneralUI");
 	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "Press ALT to enable/disable cursor.");
-	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "WASD for movement.");
+	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "Camera is free to rotate, press CTRL to enable/disable camera movement.");
+	ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "Press A to turn left, D to turn right. WASD for camera movement.");
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	if(fileName.size() > 0)
 		ImGui::Text("Current Music: %s", fileName.c_str());
@@ -968,7 +1039,6 @@ void DrawGUI()
 	
 	ImGui::Begin("Environment Parameters");
 	ImGui::TextColored(ImVec4(1.0, 0.0, 1.0, 1.0), "Neon Grid Parameters");
-	ImGui::SliderFloat("Grid Size", &gridSize, 0.1f, 1.0f);
 	ImGui::InputFloat("Scroll Speed", &gridScrollSpeed, 0.5f, 1.0f);
 	ImGui::InputFloat("Noise Zoom", &gridNoiseZoom, 1.0f, 5.0f);
 	ImGui::SliderFloat("Displacement Power", &gridDisplacementPower, 5.0f, 60.0f);
@@ -977,9 +1047,9 @@ void DrawGUI()
 	ImGui::InputFloat("Buffer Decrease Amount", &bufferDecreaseAmount, 0.000001f, 0.0001f, "%.6f");
 	ImGui::TextColored(ImVec4(1.0, 0.8, 0.0, 1.0), "Retro Sun Parameters");
 	ImGui::SliderFloat("Shader Animation Speed", &sunAnimationSpeed, 0.0f, 10.0f);
-	ImGui::SliderFloat3("Sun Position", sunPosition, -50.0f, 50.0f);
+	ImGui::SliderFloat3("Sun Position", sunPosition, -100.0f, 100.0f);
 	lightPosition = glm::vec3(sunPosition[0], sunPosition[1], sunPosition[2]);
-	ImGui::SliderFloat("Size", &sunSize, 0.5f, 10.0f);
+	ImGui::SliderFloat("Size", &sunSize, 0.5f, 100.0f);
 	ImGui::Text("Sun Light Parameters");
 	ImGui::ColorEdit3("Diffuse Color", (float*)diffuseColor);
 	ImGui::InputFloat("Diffuse Weight", &diffuse, 0.01f, 0.1f);
