@@ -43,7 +43,7 @@ void main(){
 	}
 	
     float lineSize = 0.05;
-    float lineSpeed = fract(u_time * 5.0);
+    float lineSpeed = 1.0 - fract(u_time * 5.0);
     float lineY = fract(i_UV.y * 10.0);
     float lines = line(lineSpeed, lineSize, 0.05, lineY);
 	

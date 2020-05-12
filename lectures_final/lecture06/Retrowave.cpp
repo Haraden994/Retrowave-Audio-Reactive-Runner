@@ -125,7 +125,7 @@ GLfloat lastX = 400, lastY = 300;
 bool firstMouse = true;
 
 // we create a camera. We pass the initial position as a paramenter to the constructor. The last boolean tells that we want a camera "anchored" to the ground
-Camera camera(glm::vec3(0.0f, 0.0f, 7.0f), GL_FALSE);
+Camera camera(glm::vec3(0.0f, 2.0f, 24.0f), GL_FALSE);
 
 // parameters for time calculation
 GLfloat deltaTime = 0.0f;
@@ -135,7 +135,7 @@ int remainingFrames = 0;
 
 // boolean to activate/deactivate wireframe rendering
 GLboolean wireframe = GL_FALSE;
-GLboolean mouseEnabled = GL_FALSE;
+GLboolean mouseEnabled = GL_TRUE;
 GLboolean freeCamera = GL_FALSE;
 
 // a vector for all the Shader Programs used in the application
@@ -264,8 +264,6 @@ int main()
     glEnable(GL_DEPTH_TEST);
 	// MSAA Enable
 	glEnable(GL_MULTISAMPLE);
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
 	glEnable(GL_BLEND);
 	glEnable(GL_STENCIL_TEST);
 	glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -317,7 +315,7 @@ int main()
     // Projection matrix: FOV angle, aspect ratio, near and far planes
     glm::mat4 projection = glm::perspective(45.0f, (float)screenWidth/(float)screenHeight, 0.1f, 10000.0f);
     // View matrix (=camera): position, view direction, camera "up" vector
-    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 7.0f), glm::vec3(0.0f, 0.0f, -7.0f), glm::vec3(0.0f, 1.0f, 7.0f));
+    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 25.0f), glm::vec3(0.0f, 0.0f, -7.0f), glm::vec3(0.0f, 1.0f, 7.0f));
 	
 	// start music reproduction and processing
 	musicStartTime = glfwGetTime();
@@ -376,11 +374,11 @@ int main()
         // Check is an I/O event is happening
         glfwPollEvents();
 		// we apply FPS camera movements
-		if(freeCamera)
+		if(freeCamera){
 			apply_camera_movements();
-		// View matrix (=camera): position, view direction, camera "up" vector
-        glm::mat4 view = camera.GetViewMatrix();
-		
+			// View matrix (=camera): position, view direction, camera "up" vector
+			glm::mat4 view = camera.GetViewMatrix();
+		}
 		// we "clear" frame, z and stencil buffers
 		glStencilMask(~0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -663,6 +661,7 @@ int main()
 				respawnThreshold = rand() % (maxZ - (minZ - 45) + 1) + (minZ - 45);
 			}
 			modelMatrices[i] = glm::translate(modelMatrices[i], powerUps[i].position);
+			//modelMatrices[i] = glm::rotate(modelMatrices[i], glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			modelMatrices[i] = glm::scale(modelMatrices[i], glm::vec3(sphereScale));
 			glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrices[i]));
 			

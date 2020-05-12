@@ -5,29 +5,29 @@
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
       <wxString Value="C:\Users\night\Desktop\RTGP\lectures_final\lecture06\Retrowave.cpp" Name="FileName"/>
-      <int Value="679" Name="FirstVisibleLine"/>
-      <int Value="696" Name="CurrentLine"/>
+      <int Value="645" Name="FirstVisibleLine"/>
+      <int Value="663" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
       <wxString Value="C:\Users\night\Desktop\RTGP\include\glfw\glfw3.h" Name="FileName"/>
-      <int Value="3704" Name="FirstVisibleLine"/>
-      <int Value="3737" Name="CurrentLine"/>
+      <int Value="2742" Name="FirstVisibleLine"/>
+      <int Value="2760" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
       <wxString Value="c:\MinGW\include\stdlib.h" Name="FileName"/>
-      <int Value="462" Name="FirstVisibleLine"/>
+      <int Value="478" Name="FirstVisibleLine"/>
       <int Value="480" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
       <wxString Value="C:\Users\night\Desktop\RTGP\include\utils\camera.h" Name="FileName"/>
-      <int Value="94" Name="FirstVisibleLine"/>
-      <int Value="103" Name="CurrentLine"/>
+      <int Value="62" Name="FirstVisibleLine"/>
+      <int Value="64" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
