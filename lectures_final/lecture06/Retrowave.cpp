@@ -150,7 +150,7 @@ GLfloat sunSize = 14.0f;
 GLfloat gridScrollSpeed = 20.0f;
 GLfloat gridSize = 0.1f;
 GLfloat gridNoiseZoom = 10.0f;
-GLfloat gridDisplacementPower = 40.0f;
+GLfloat gridDisplacementPower = 50.0f;
 GLfloat streetSize = 0.1f;
 GLfloat fadeAfterStreet = 0.1f;
 GLfloat palmOutline[] = {0.0f, 1.0f, 1.0f};
@@ -1067,7 +1067,7 @@ void DrawGUI()
 	ImGui::TextColored(ImVec4(1.0, 0.0, 1.0, 1.0), "Neon Grid Parameters");
 	ImGui::InputFloat("Scroll Speed", &gridScrollSpeed, 0.5f, 1.0f);
 	ImGui::InputFloat("Noise Zoom", &gridNoiseZoom, 1.0f, 5.0f);
-	ImGui::SliderFloat("Displacement Power", &gridDisplacementPower, 5.0f, 60.0f);
+	ImGui::SliderFloat("Displacement Power", &gridDisplacementPower, 5.0f, 80.0f);
 	ImGui::InputFloat("Street Size", &streetSize, 0.01f, 0.1f, "%.3f");
 	ImGui::InputFloat("Fade After Street", &fadeAfterStreet, 0.01f, 0.1f, "%.3f");
 	ImGui::InputFloat("Buffer Decrease Amount", &bufferDecreaseAmount, 0.000001f, 0.0001f, "%.6f");
@@ -1200,12 +1200,16 @@ void CreateBandsBuffer()
 	}
 }
 
-void AubioReset(bool fftcheck)
+void AubioReset(bool ffttcheck)
 {
-	if(fftcheck)
+	if(ffttcheck){
 		del_aubio_fft(fft);
+		del_aubio_tempo(tempo);
+	}
 	del_fvec(fftin);
 	del_cvec(fftout);
+	del_fvec(tin);
+	del_fvec(tout);
 	aubio_cleanup();
 }
 
