@@ -72,6 +72,9 @@ struct PowerUp{
 	bool hit;
 	GLint explodeValue;
 	GLfloat explosionStartTime;
+	bool spawned;
+	bool spawning;
+	GLfloat spawningOutlineScale;
 };
 
 struct Car{
@@ -102,10 +105,10 @@ void DrawGUI();
 
 // Aubio reset for errors or music change
 void AubioReset(bool fftcheck);
-// Setup aubio for spectrum analysis using FFT
-void FFTInitialize(string musicPath);
-// Compute and extract Fast Fourier Transform
-void FFTCompute(GLfloat deltaTime);
+// Setup aubio for spectrum analysis using FFT and Tempo detection
+void AubioInitialize(string musicPath);
+// Compute and extract Fast Fourier Transform and detect Tempo
+void AubioCompute(GLfloat deltaTime, PowerUp pwUps[]);
 // Merge the win_s/2 frequency bands into 8 frequency bands
 void MergeFrequencyBands();
 // Frequency bands normalization leading to a better manipulation inside the vertex shader
@@ -183,6 +186,8 @@ GLfloat carTurnAngle = 0.0f;
 GLfloat streetBorder = (streetSize*100.0f) / 2.0f;
 GLfloat blinkStart;
 GLfloat blinkDuration = 0.8f;
+GLuint tempoSpawn = 0;
+GLuint pwAmount = 100;
 
 // texture unit for the cube map
 GLuint textureCube;
@@ -319,7 +324,7 @@ int main()
 	
 	// start music reproduction and processing
 	musicStartTime = glfwGetTime();
-	FFTInitialize(musicPath);
+	AubioInitialize(musicPath);
 	soundEngine->play2D(musicPath.c_str(), true);
 	
 	// Palms parameters initialization
@@ -334,14 +339,16 @@ int main()
 	}
 	
 	// Powerup parameters
-	GLuint pwAmount = 10;
-	GLint maxZ = 200;
-	GLint minZ = 75;
 	PowerUp powerUps[pwAmount];
-	GLint respawnThreshold;
+	GLint respawnThreshold = 30;
 	GLfloat sphereScale = 0.3f;
+	GLfloat pwUpStartingZ = -70.0f;
+	GLfloat minOutlineScale = 1.05f;
+	GLfloat maxOutlineScale = 5.0f;
+	GLint randomZSpawnOffset = 31;
+	// powerups initialization
 	for(int i = 0; i < pwAmount; i++){
-		powerUps[i].position = glm::vec3(0.0f, 0.0f, 29.0f);
+		powerUps[i].position = glm::vec3(0.0f, 0.0f, pwUpStartingZ);
 		powerUps[i].radius = sphereScale;
 		if(i % 2 == 0)
 			powerUps[i].speedUp = true;
@@ -350,6 +357,9 @@ int main()
 		powerUps[i].explodeValue = 0;
 		powerUps[i].hit = false;
 		powerUps[i].explosionStartTime = 0.0f;
+		powerUps[i].spawned = false;
+		powerUps[i].spawning = true;
+		powerUps[i].spawningOutlineScale = maxOutlineScale;
 	}
 	
 	Car countach;
@@ -366,7 +376,7 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-		FFTCompute(deltaTime);
+		AubioCompute(deltaTime, powerUps);
 		
 		// Draw the GUI through ImGui
 		DrawGUI();
@@ -616,7 +626,6 @@ int main()
 		glUniform1f(glGetUniformLocation(full_color.Program, "time"), glfwGetTime());
 		
 		glm::mat4 carOutlineModelMatrix = carModelMatrix;
-		//carOutlineModelMatrix = glm::translate(carOutlineModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 		carOutlineModelMatrix = glm::scale(carOutlineModelMatrix, glm::vec3(1.05f));
 		glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(carOutlineModelMatrix));
 		
@@ -630,13 +639,14 @@ int main()
 		
 		for(int i = 0; i < pwAmount; i++){
 			pwUp_shader.Use();
-		
+			
 			glStencilFunc(GL_ALWAYS, 1, 0xFF);
 			glStencilMask(0xFF);
 			
 			glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
 			glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 			
+			// shader animation and outline color based on the powerup type
 			if(powerUps[i].speedUp){
 				glUniform1f(glGetUniformLocation(pwUp_shader.Program, "u_time"), glfwGetTime());
 				pwUpOutline = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -647,25 +657,38 @@ int main()
 			}
 			glUniform1f(glGetUniformLocation(pwUp_shader.Program, "time"), glfwGetTime() - powerUps[i].explosionStartTime);
 			glUniform1i(glGetUniformLocation(pwUp_shader.Program, "explodeValue"), powerUps[i].explodeValue);
-			
+			// initial X positioning of powerups this will be executed just one time
 			if(once){
+				powerUps[i].position.z = 25.0f;
 				powerUps[i].position.x = (GLfloat)(rand()%((GLint)streetBorder+(GLint)streetBorder + 1) - (GLint)streetBorder);
-				respawnThreshold = rand() % (maxZ - minZ + 1) + minZ;
 			}
-			powerUps[i].position.z += palmTranslationSpeed * deltaTime;
-			if(powerUps[i].position.z > (GLfloat)respawnThreshold){
-				powerUps[i].hit = false;
-				powerUps[i].explodeValue = 0;
-				powerUps[i].position.z = (GLfloat)(-(rand()%(maxZ-minZ + 1) + minZ));
-				powerUps[i].position.x = (GLfloat)(rand()%(((GLint)streetBorder - 1) + ((GLint)streetBorder - 1) + 1) - ((GLint)streetBorder - 1));
-				respawnThreshold = rand() % (maxZ - (minZ - 45) + 1) + (minZ - 45);
+			if(powerUps[i].spawning){
+				if(powerUps[i].spawningOutlineScale > minOutlineScale){
+					powerUps[i].spawningOutlineScale -= deltaTime * (gridScrollSpeed * 0.05f);
+				}
+				else
+					powerUps[i].spawned = true;
+				// powerups translation along the grid
+				powerUps[i].position.z += palmTranslationSpeed * deltaTime;
+				// check if the powerup reached the respawn threshold, considered as Z axis position threshold
+				// if so, the powerup is repositioned on a random X coordinate and shader values are reset
+				if(powerUps[i].position.z > (GLfloat)respawnThreshold){
+					powerUps[i].spawned = false;
+					powerUps[i].spawning = false;
+					powerUps[i].spawningOutlineScale = maxOutlineScale;
+					powerUps[i].hit = false;
+					powerUps[i].explodeValue = 0;
+					powerUps[i].position.z = pwUpStartingZ - (rand() % randomZSpawnOffset);
+					powerUps[i].position.x = (GLfloat)(rand()%(((GLint)streetBorder - 1) + ((GLint)streetBorder - 1) + 1) - ((GLint)streetBorder - 1));
+				}
 			}
 			modelMatrices[i] = glm::translate(modelMatrices[i], powerUps[i].position);
 			//modelMatrices[i] = glm::rotate(modelMatrices[i], glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			modelMatrices[i] = glm::scale(modelMatrices[i], glm::vec3(sphereScale));
 			glUniformMatrix4fv(glGetUniformLocation(pwUp_shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrices[i]));
 			
-			sphereModel.Draw(pwUp_shader);
+			if(powerUps[i].spawned)
+				sphereModel.Draw(pwUp_shader);
 			
 			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 			glStencilMask(0x00);
@@ -679,34 +702,35 @@ int main()
 			glUniform1i(glGetUniformLocation(full_color.Program, "blink"), 0);
 			glUniform1f(glGetUniformLocation(full_color.Program, "time"), glfwGetTime());
 			
-			glm::mat4 pwUpModelMatrix = modelMatrices[i];
-			//pwUpModelMatrix = glm::translate(pwUpModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
-			pwUpModelMatrix = glm::scale(pwUpModelMatrix, glm::vec3(1.05f));
-			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(pwUpModelMatrix));
+			glm::mat4 pwUpOutlineMatrix = modelMatrices[i];
+			pwUpOutlineMatrix = glm::scale(pwUpOutlineMatrix, glm::vec3(powerUps[i].spawningOutlineScale));
+			glUniformMatrix4fv(glGetUniformLocation(full_color.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(pwUpOutlineMatrix));
 			
-			if(!powerUps[i].hit)
+			if(!powerUps[i].hit && powerUps[i].spawning)
 				sphereModel.Draw(full_color);
 			
 			glStencilFunc(GL_ALWAYS, 1, 0xFF);
 			
 			// Collision check for each powerup
-			if(!powerUps[i].hit && CheckCollision(powerUps[i], countach)){
-				powerUps[i].hit = true;
-				if(powerUps[i].speedUp){
-					gridScrollSpeed += gridScrollSpeed * 0.1f;
-					soundEngine->play2D(speedUpSFX.c_str(), false);
-					blink = 1;
+			if(!powerUps[i].hit && powerUps[i].spawned){
+				if(CheckCollision(powerUps[i], countach)){
+					powerUps[i].hit = true;
+					if(powerUps[i].speedUp){
+						gridScrollSpeed += gridScrollSpeed * 0.1f;
+						soundEngine->play2D(speedUpSFX.c_str(), false);
+						blink = 1;
+					}
+					else{
+						gridScrollSpeed -= gridScrollSpeed * 0.1f;
+						if(gridScrollSpeed < 5.0f)
+							gridScrollSpeed = 5.0f;
+						soundEngine->play2D(speedDownSFX.c_str(), false);
+						blink = -1;
+					}
+					blinkStart = glfwGetTime();
+					powerUps[i].explodeValue = 1;
+					powerUps[i].explosionStartTime = glfwGetTime();
 				}
-				else{
-					gridScrollSpeed -= gridScrollSpeed * 0.2f;
-					if(gridScrollSpeed < 5.0f)
-						gridScrollSpeed = 5.0f;
-					soundEngine->play2D(speedDownSFX.c_str(), false);
-					blink = -1;
-				}
-				blinkStart = glfwGetTime();
-				powerUps[i].explodeValue = 1;
-				powerUps[i].explosionStartTime = glfwGetTime();
 			}
 			
 			// turn off the car blink after blinkDuration seconds
@@ -952,9 +976,12 @@ aubio_source_t* aubioSource; // Aubio source, used to read a media file
 uint_t win_s = 1024; // window size
 uint_t hop_s = win_s / 4; // hop size
 aubio_fft_t* fft; // Fast Fourier Transform struct
+aubio_tempo_t* tempo; // Tempo object
 uint_t samplerate = 0;
-fvec_t* fftin; // Input signal for FFT
+fvec_t* fftin; // Input signal for FFT computation
 cvec_t* fftout; // FFT's spectrum output
+fvec_t* tin; // Input signal for tempo detection
+fvec_t* tout; // Tempo detection output
 float samplesPerWindow;
 
 void DrawGUI()
@@ -982,7 +1009,7 @@ void DrawGUI()
 		lastFrame = 0;
 		remainingFrames = 0;
 		musicStartTime = glfwGetTime();
-		FFTInitialize(musicPath);
+		AubioInitialize(musicPath);
 		PlayMusic(musicPath);
 	}
 	ImGui::SameLine();
@@ -1001,7 +1028,7 @@ void DrawGUI()
 					lastFrame = 0;
 					remainingFrames = 0;
 					musicStartTime = glfwGetTime();
-					FFTInitialize(musicPath);
+					AubioInitialize(musicPath);
 					PlayMusic(musicPath);
 				}
 			}
@@ -1063,7 +1090,7 @@ void DrawGUI()
 	ImGui::End();
 }
 
-void FFTInitialize(string musicPath)
+void AubioInitialize(string musicPath)
 {
 	aubioSource = new_aubio_source(musicPath.c_str(), 0, hop_s);
 	if(!aubioSource){
@@ -1078,14 +1105,18 @@ void FFTInitialize(string musicPath)
 	fftout = new_cvec(win_s);
 	fft = new_aubio_fft(win_s);
 	
+	tin = new_fvec(hop_s);
+	tout = new_fvec(1);
+	tempo = new_aubio_tempo("default", win_s, hop_s, samplerate);
+	
 	bandsBuffer.assign(8, 0.0);
 	bufferDecrease.assign(8, 0.0);
 	
-	if(!fft)
+	if(!fft || !tempo)
 		AubioReset(false);
 }
 
-void FFTCompute(GLfloat deltaTime)
+void AubioCompute(GLfloat deltaTime, PowerUp pwUps[])
 {
 	// Taking time and frame relationship into account in order to compute FFT in real time.
 	uint_t framesRead = 0;
@@ -1094,21 +1125,33 @@ void FFTCompute(GLfloat deltaTime)
 	
 	frequencyBands.assign(8, 0.0);
 	
+	// iterate through all the passed frames
 	while(n_frames < passedFrames){
 		aubio_source_do(aubioSource, fftin, &framesRead);
+		aubio_source_do(aubioSource, tin, &framesRead);
 		n_frames += framesRead;
 		aubio_fft_do(fft, fftin, fftout);
+		aubio_tempo_do(tempo, tin, tout);
 		
 		MergeFrequencyBands();
 		FrequencyBandsNormalize();
 		CreateBandsBuffer();
 		
+		if(tout->data[0] != 0){
+			tempoSpawn++;
+			if(tempoSpawn > pwAmount)
+				tempoSpawn = 0;
+			pwUps[tempoSpawn-1].spawning = true;
+		}
+		
+		// check if too much frames are read...
 		if(framesRead != hop_s)
 			break;
 	}
+	
+	// ...and update the remaining frames if this happens.
 	remainingFrames = n_frames - passedFrames;
 	//printf("Read %d frames at %dHz (%d blocks).\n", n_frames, samplerate, n_frames / hop_s);
-
 }
 
 void MergeFrequencyBands()

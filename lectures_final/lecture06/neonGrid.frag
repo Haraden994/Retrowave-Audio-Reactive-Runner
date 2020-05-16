@@ -29,6 +29,7 @@ const float edgeThickness = 2.1;
 const float edgeSharpness = 20.0;
 const float edgeSubtract = 0.3;
 const float glowStrength = 10.0;
+// the model is composed of 99x99 faces, we need to multiply each of the UV coordinate by the size of the model to achieve the amount of zoom needed to draw the fragment grid.
 const float gridZoom = 99.0;
 
 uniform float streetSize;
