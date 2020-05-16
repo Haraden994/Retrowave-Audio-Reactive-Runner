@@ -329,7 +329,7 @@ int main()
 	
 	// Palms parameters initialization
 	GLfloat palmStartingZ = -75.0f;
-	GLuint palmAmount = 40;
+	GLuint palmAmount = 20;
 	GLfloat zOffset = 100.0f / (float)palmAmount;
 	GLfloat palmZPositions[palmAmount];
 	for(int i = 0; i < palmAmount; i++){
