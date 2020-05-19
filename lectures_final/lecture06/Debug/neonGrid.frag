@@ -34,6 +34,7 @@ const float gridZoom = 99.0;
 
 uniform float streetSize;
 uniform float fade;
+uniform float frequencyBands[];
 
 vec3 Grid(){
 	vec2 st = vec2(interp_UV * gridZoom);
@@ -47,6 +48,43 @@ vec3 Grid(){
 	c *= 1.0 - (smoothstep(0.5 - streetSize - fade, 0.5 - streetSize, interp_UV.x) - smoothstep(0.5 + streetSize, 0.5 + streetSize + fade, interp_UV.x));
 	c *= street;*/
 	return c * gridColor;
+}
+
+vec3 deepBass;
+vec3 bass;
+vec3 mediumBass;
+vec3 medium;
+vec3 mediumHigh;
+vec3 high;
+vec3 veryHigh;
+vec3 over;
+
+// method to visualize the eight zones relative to the eight frequency bands
+vec3 BandsColor(){
+    if(interp_UV.y <= 0.125){
+        return mix(deepBass, bass, interp_UV.y / 0.125);
+    }
+    if(interp_UV.y <= 0.25){
+        return mix(bass, mediumBass, (interp_UV.y - 0.125) / 0.125);
+    }
+    if(interp_UV.y <= 0.375){
+        return mix(mediumBass, medium, (interp_UV.y - 0.25) / 0.125);
+    }
+    if(interp_UV.y <= 0.5){
+        return mix(medium, mediumHigh, (interp_UV.y - 0.375) / 0.125);
+    }
+    if(interp_UV.y <= 0.625){
+        return mix(mediumHigh, high, (interp_UV.y - 0.5) / 0.125);
+    }
+    if(interp_UV.y <= 0.75){
+        return mix(high, veryHigh, (interp_UV.y - 0.625) / 0.125);
+    }
+    if(interp_UV.y <= 0.875){
+        return mix(veryHigh, over, (interp_UV.y - 0.75) / 0.125);
+    }
+	if(interp_UV.y <= 1.0){
+		return mix(over, deepBass, (interp_UV.y - 0.875) / 0.125);
+	}
 }
 
 void main() 
@@ -75,5 +113,17 @@ void main()
 		bgColor *= attenuation;
 	}
 	
-   	outColor = vec4(bgColor + Grid(), 1.0f);   
+   	outColor = vec4(bgColor + Grid(), 1.0f);
+	// Uncomment all the following lines to see the 8 frequency UV areas
+	/*
+	vec3 deepBass = vec3(1.0, 0.0, 0.0);
+	bass = vec3(1.0, 0.5, 0.0);
+	mediumBass = vec3(1.0, 1.0, 0.0);
+	medium = vec3(0.5, 1.0, 0.0);
+	mediumHigh = vec3(0.0, 1.0, 0.0);
+	high = vec3(0.0, 1.0, 0.5);
+	veryHigh = vec3(0.0, 1.0, 1.0);
+	over = vec3(0.0, 0.0, 1.0);
+	outColor = vec4(BandsColor(), 1.0f);
+	*/
 }

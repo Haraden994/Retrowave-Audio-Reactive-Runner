@@ -251,7 +251,7 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_callback);
 
     // we disable the mouse cursor
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     // GLAD tries to load the context set by GLFW
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
@@ -741,6 +741,9 @@ int main()
 		once = false;
 		
         /////////////////// SKYBOX ////////////////////////////////////////////////
+		// we use the cube to attach the 6 textures of the environment map.
+        // we render it after all the other objects, in order to avoid the depth tests as much as possible.
+        // we will set, in the vertex shader for the skybox, all the values to the maximum depth. Thus, the environment map is rendered only where there are no other objects in the image (so, only on the background). Thus, we set the depth test to GL_LEQUAL, in order to let the fragments of the background pass the depth test (because they have the maximum depth possible, and the default setting is GL_LESS)
         glDepthFunc(GL_LEQUAL);
         skybox_shader.Use();
         // we activate the cube map
