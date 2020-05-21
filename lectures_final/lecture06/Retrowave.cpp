@@ -1128,7 +1128,7 @@ void AubioCompute(GLfloat deltaTime, PowerUp pwUps[])
 	
 	frequencyBands.assign(8, 0.0);
 	
-	// iterate through all the passed frames
+	// iterate through all the passing frames
 	while(n_frames < passedFrames){
 		aubio_source_do(aubioSource, fftin, &framesRead);
 		aubio_source_do(aubioSource, tin, &framesRead);

@@ -75,28 +75,36 @@ float fbm(vec2 x)
 // Displace vertices according to their V value, the grid is divided in eight zones, one for each Frequency Band.
 float DisplaceByFBands(){
     if(UV.y <= 0.125){
-        return mix(frequencyBands[0], frequencyBands[1], UV.y / 0.125);
+        return mix(frequencyBands[0], frequencyBands[1], 
+								UV.y / 0.125);
     }
     if(UV.y <= 0.25){
-        return mix(frequencyBands[1], frequencyBands[2], (UV.y - 0.125) / 0.125);
+        return mix(frequencyBands[1], frequencyBands[2], 
+								(UV.y - 0.125) / 0.125);
     }
     if(UV.y <= 0.375){
-        return mix(frequencyBands[2], frequencyBands[3], (UV.y - 0.25) / 0.125);
+        return mix(frequencyBands[2], frequencyBands[3], 
+								(UV.y - 0.25) / 0.125);
     }
     if(UV.y <= 0.5){
-        return mix(frequencyBands[3], frequencyBands[4], (UV.y - 0.375) / 0.125);
+        return mix(frequencyBands[3], frequencyBands[4], 
+								(UV.y - 0.375) / 0.125);
     }
     if(UV.y <= 0.625){
-        return mix(frequencyBands[4], frequencyBands[5], (UV.y - 0.5) / 0.125);
+        return mix(frequencyBands[4], frequencyBands[5], 
+								(UV.y - 0.5) / 0.125);
     }
     if(UV.y <= 0.75){
-        return mix(frequencyBands[5], frequencyBands[6], (UV.y - 0.625) / 0.125);
+        return mix(frequencyBands[5], frequencyBands[6], 
+								(UV.y - 0.625) / 0.125);
     }
     if(UV.y <= 0.875){
-        return mix(frequencyBands[6], frequencyBands[7], (UV.y - 0.75) / 0.125);
+        return mix(frequencyBands[6], frequencyBands[7], 
+								(UV.y - 0.75) / 0.125);
     }
 	if(UV.y <= 1.0){
-		return mix(frequencyBands[7], frequencyBands[0], (UV.y - 0.875) / 0.125);
+		return mix(frequencyBands[7], frequencyBands[0], 
+								(UV.y - 0.875) / 0.125);
 	}
 }
 
@@ -106,22 +114,25 @@ void main()
 	// translation for noise and grid scrolling animation
 	vec2 translate = vec2(0.0, speed);
 	
-	// speed used for vertex translation, this will let the vertex move along the z axis and then return to its original position
+	// speed used for vertex translation, this will let the vertex 
+	//move along the z axis and then return to its original position
 	float speedFrac = fract(speed) * 0.1;
-	//speedFrac = 0;
 	
-	// the noise is also traslated by multiplying the floor of the translation with an offset depending on the zoom value (offset = zoom * 10^-2)
-	// the resulting translation let the noise move row by row along the grid.
-	vec2 noisePos = UV * zoom - floor(translate) * (zoom / 100.0);
+	// The noise is also traslated by multiplying the floor of the translation 
+	// with an offset depending on the zoom value (offset = zoom * 10^-2).
+	// The resulting translation let the noise move row by row along the grid.
+	vec2 noisePos = UV * zoom - floor(translate) * (zoom / 99.0);
 	float noised = fbm(noisePos);
 	
 	// we add the street space into the grid by smoothing the noise
-	noised *= 1.0 - (smoothstep(0.5 - streetSize - fade, 0.5 - streetSize, UV.x) - smoothstep(0.5 + streetSize, 0.5 + streetSize + fade, UV.x));
+	noised *= 1.0 - (smoothstep(0.5 - streetSize - fade, 0.5 - streetSize, UV.x) 
+				- smoothstep(0.5 + streetSize, 0.5 + streetSize + fade, UV.x));
 
 	float displacement = (noised * DisplaceByFBands()) * dPower;
 	
 	vec3 displacedPosition = position + displacement * normal;
-	displacedPosition.z += speedFrac * 50; // translate the vertex position in order to achieve the movement illusion
+	// translate the vertex position in order to achieve the movement illusion
+	displacedPosition.z += speedFrac * 50;
 	vPosition = displacedPosition;
 	
 	vec4 modelView = viewMatrix * modelMatrix * vec4(displacedPosition, 1.0);
