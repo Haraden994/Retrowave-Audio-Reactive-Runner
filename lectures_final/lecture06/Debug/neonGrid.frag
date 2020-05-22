@@ -115,8 +115,8 @@ void main()
 	
    	outColor = vec4(bgColor + Grid(), 1.0f);
 	// Uncomment all the following lines to see the 8 frequency UV areas
-	/*
-	vec3 deepBass = vec3(1.0, 0.0, 0.0);
+	
+	deepBass = vec3(1.0, 0.0, 0.0);
 	bass = vec3(1.0, 0.5, 0.0);
 	mediumBass = vec3(1.0, 1.0, 0.0);
 	medium = vec3(0.5, 1.0, 0.0);
@@ -125,5 +125,5 @@ void main()
 	veryHigh = vec3(0.0, 1.0, 1.0);
 	over = vec3(0.0, 0.0, 1.0);
 	outColor = vec4(BandsColor(), 1.0f);
-	*/
+	
 }
