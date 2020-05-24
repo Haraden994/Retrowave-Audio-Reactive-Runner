@@ -13,14 +13,14 @@ float rand(vec2 n)
 	return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
-float line(float center, float size, float edge, float y) {
+float line(float center, float size, float edge, float coord) {
 	return max(
         max(
-        	smoothstep(center - size - edge, center - size, y) *
-            smoothstep(center + size + edge, center + size, y),
-        	smoothstep(center + size + edge - 1.0, center + size - 1.0, y)
+        	smoothstep(center - size - edge, center - size, coord) *
+            smoothstep(center + size + edge, center + size, coord),
+        	smoothstep(center + size + edge - 1.0, center + size - 1.0, coord)
         ),
-        smoothstep(center - size + 1.0 - edge, center - size + 1.0, y)
+        smoothstep(center - size + 1.0 - edge, center - size + 1.0, coord)
     );
 }
 
@@ -42,10 +42,10 @@ void main(){
 		flicker = vec3(0.0, abs(sin(u_time * random * flickerSpeed)), 0.0);
 	}
 	
-    float lineSize = 0.05;
+    float lineSize = 0.3;
     float lineSpeed = 1.0 - fract(u_time * 5.0);
     float lineY = fract(i_UV.y * 10.0);
-    float lines = line(lineSpeed, lineSize, 0.05, lineY);
+    float lines = 1.0 - line(lineSpeed, lineSize, 0.05, lineY);
 	
 	if(explodeValue == 0)
 		gradient *= lines;

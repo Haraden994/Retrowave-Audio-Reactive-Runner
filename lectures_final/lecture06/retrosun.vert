@@ -19,9 +19,10 @@ out vec2 interp_UV;
 void main()
 {
 	// Original vertex position is copied in a local variable.
-	vec3 flattened = position;
+	// old parameters used when the sun model was a flattened sphere.
+	//vec3 flattened = position;
 	// Z coordinate is set at 0
-	flattened.z = 0.0;
+	//flattened.z = 0.0;
 	
 	// I assign the values to a variable with "out" qualifier so to use the per-fragment interpolated values in the Fragment shader
 	interp_UV = UV;

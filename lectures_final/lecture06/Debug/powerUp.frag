@@ -42,10 +42,10 @@ void main(){
 		flicker = vec3(0.0, abs(sin(u_time * random * flickerSpeed)), 0.0);
 	}
 	
-    float lineSize = 0.05;
+    float lineSize = 0.3;
     float lineSpeed = 1.0 - fract(u_time * 5.0);
     float lineY = fract(i_UV.y * 10.0);
-    float lines = line(lineSpeed, lineSize, 0.05, lineY);
+    float lines = 1.0 - line(lineSpeed, lineSize, 0.05, lineY);
 	
 	if(explodeValue == 0)
 		gradient *= lines;

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Session Name="C:\Users\night\Desktop\RTGP\LezioniRTGP_win.workspace">
-  <int Value="0" Name="m_selectedTab"/>
+  <int Value="4" Name="m_selectedTab"/>
   <wxString Value="C:\Users\night\Desktop\RTGP\LezioniRTGP_win.workspace" Name="m_workspaceName"/>
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
       <wxString Value="C:\Users\night\Desktop\RTGP\lectures_final\lecture06\Retrowave.cpp" Name="FileName"/>
-      <int Value="428" Name="FirstVisibleLine"/>
-      <int Value="450" Name="CurrentLine"/>
+      <int Value="718" Name="FirstVisibleLine"/>
+      <int Value="1249" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
@@ -28,6 +28,13 @@
       <wxString Value="C:\Users\night\Desktop\RTGP\include\utils\camera.h" Name="FileName"/>
       <int Value="62" Name="FirstVisibleLine"/>
       <int Value="64" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="C:\Users\night\Desktop\RTGP\include\utils\shader_v1.h" Name="FileName"/>
+      <int Value="30" Name="FirstVisibleLine"/>
+      <int Value="43" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>

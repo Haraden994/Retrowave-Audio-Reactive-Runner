@@ -36,16 +36,6 @@ uniform float streetSize;
 uniform float fade;
 uniform float frequencyBands[];
 
-vec3 Grid(){
-	vec2 st = vec2(interp_UV * gridZoom);
-	st = fract(st);
-	st = abs(st - 0.5) * edgeThickness;
-	st = pow(st, vec2(edgeSharpness)) - edgeSubtract;
-	
-	float c = clamp(st.x + st.y, 0.0, 1.0) * glowStrength;
-	return c * gridColor;
-}
-
 vec3 deepBass;
 vec3 bass;
 vec3 mediumBass;
@@ -81,6 +71,16 @@ vec3 BandsColor(){
 	if(interp_UV.y <= 1.0){
 		return mix(highest, deepBass, (interp_UV.y - 0.875) / 0.125);
 	}
+}
+
+vec3 Grid(){
+	vec2 st = vec2(interp_UV * gridZoom);
+	st = fract(st);
+	st = abs(st - 0.5) * edgeThickness;
+	st = pow(st, vec2(edgeSharpness)) - edgeSubtract;
+	
+	float c = clamp(st.x + st.y, 0.0, 1.0) * glowStrength;
+	return c * gridColor;
 }
 
 void main() 

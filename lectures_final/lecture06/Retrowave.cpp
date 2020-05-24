@@ -66,14 +66,26 @@ positive Z axis points "outside" the screen
 #include <stb_image/stb_image.h>
 
 struct PowerUp{
+	//powerup and collider position
 	glm::vec3 position;
+	//sphere collider radius
 	GLfloat radius;
+	//check, upon collision, if the speed
+	//must be increased or decreased
 	bool speedUp;
+	//check if a collision occurred
 	bool hit;
+	//int passed as uniform to the geometry
+	//shader to start the explosion animation
 	GLint explodeValue;
+	//the time when the explosion starts
 	GLfloat explosionStartTime;
+	//check if the powerup spawned
 	bool spawned;
+	//check if the powerup is spawning
 	bool spawning;
+	//scale of the outline
+	//used during the spawning animation
 	GLfloat spawningOutlineScale;
 };
 
@@ -582,7 +594,7 @@ int main()
 		GLfloat maxTurnAngle = 2.0f;
 		GLfloat rotationSpeed = 100.0f + gridScrollSpeed * 0.1f;
 		GLfloat turnSpeed = 2.0f + gridScrollSpeed * 0.05f;
-		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(std::cos(glfwGetTime() * trembleSpeed) * trembleTranslation, std::sin(glfwGetTime() * trembleSpeed) * trembleTranslation, countach.position.z));
+		carModelMatrix = glm::translate(carModelMatrix, glm::vec3(std::sin(glfwGetTime() * trembleSpeed) * trembleTranslation, std::sin(glfwGetTime() * trembleSpeed) * trembleTranslation, countach.position.z));
 		if(!freeCamera){
 			if(keys[GLFW_KEY_A] && countach.position.x >= (-streetBorder + 1.0f)){
 				countach.position.x -= deltaTime * turnSpeed;

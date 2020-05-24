@@ -15,14 +15,14 @@ float circle(in vec2 st, in float radius, in float edge){
                          dot(dist , dist) * 4.0);
 }
 
-float line(float center, float size, float edge, float y) {
+float line(float center, float size, float edge, float coord) {
 	return max(
         max(
-        	smoothstep(center - size - edge, center - size, y) *
-            smoothstep(center + size + edge, center + size, y),
-        	smoothstep(center + size + edge - 1.0, center + size - 1.0, y)
+        	smoothstep(center - size - edge, center - size, coord) *
+            smoothstep(center + size + edge, center + size, coord),
+        	smoothstep(center + size + edge - 1.0, center + size - 1.0, coord)
         ),
-        smoothstep(center - size + 1.0 - edge, center - size + 1.0, y)
+        smoothstep(center - size + 1.0 - edge, center - size + 1.0, coord)
     );
 }
 
@@ -49,7 +49,7 @@ void main()
     // line count
     float lineY = fract(interp_UV.y * 14.0);
     
-    // select our lines, invert so that active lines = 0
+    // invert the value so that active lines are the black ones
     float lines = 1.0 - line(lineInt, lineSize, 0.05, lineY);
     
     // cutoff the top lines

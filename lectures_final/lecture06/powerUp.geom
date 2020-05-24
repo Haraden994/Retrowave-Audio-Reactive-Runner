@@ -16,12 +16,7 @@ uniform int explodeValue;
 out vec2 i_UV;
 
 float magnitude = 20.0;
-
-void NewVertex(vec4 center, vec3 offset){
-	vec4 newVertexPos = projectionMatrix * viewMatrix * modelMatrix * (center + vec4(offset * 0.15, 0.0));
-	gl_Position = newVertexPos;
-	EmitVertex();
-}
+mat4 MVP;
 
 vec4 Explode(vec4 position, vec3 normal)
 {
@@ -29,16 +24,26 @@ vec4 Explode(vec4 position, vec3 normal)
     return position + vec4(direction, 0.0);
 } 
 
+void NewVertex(vec4 center, vec3 offset){
+	vec4 newVertexPos = MVP * (center + vec4(offset * 0.15, 0.0));
+	gl_Position = newVertexPos;
+	EmitVertex();
+}
+
 void Implode(int vertex){
-	vec4 center = gl_in[vertex].gl_Position + vec4(vertexNormal[vertex] * -explodeValue * time * magnitude * 0.8, 0.0);
-	
+
+	vec4 center = gl_in[vertex].gl_Position + 
+		vec4(vertexNormal[vertex] * -explodeValue * time * magnitude * 0.8, 0.0);
+		
 	NewVertex(center, vec3(-1.0, -1.0, 0.0));
 	NewVertex(center, vec3(1.0, -1.0, 0.0));
 	NewVertex(center, vec3(-1.0, 1.0, 0.0));
 	NewVertex(center, vec3(1.0, 1.0, 0.0));
 	EndPrimitive();
 	
-	center = gl_in[vertex].gl_Position + vec4(vertexNormal[vertex] * -explodeValue * time * magnitude * 1.5, 0.0);
+	center = gl_in[vertex].gl_Position + 
+		vec4(vertexNormal[vertex] * -explodeValue * time * magnitude * 1.5, 0.0);
+		
 	NewVertex(center, vec3(-1.0, 0.0, 1.0));
 	NewVertex(center, vec3(1.0, 0.0, 1.0));
 	NewVertex(center, vec3(-1.0, 0.0, -1.0));
@@ -55,10 +60,11 @@ vec3 GetNormal()
 
 void main(){
 	vec3 normal = GetNormal();
+	MVP = projectionMatrix * viewMatrix * modelMatrix;
 	
 	for(int i = 0; i < gl_in.length(); i++){
 		i_UV = interp_UV[i];
-		gl_Position = projectionMatrix * viewMatrix * modelMatrix * Explode(gl_in[i].gl_Position, normal);
+		gl_Position = MVP * Explode(gl_in[i].gl_Position, normal);
 		EmitVertex();
 	}
 	EndPrimitive();
