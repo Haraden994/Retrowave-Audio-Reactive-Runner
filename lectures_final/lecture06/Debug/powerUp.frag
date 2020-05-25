@@ -13,14 +13,14 @@ float rand(vec2 n)
 	return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
-float line(float center, float size, float edge, float y) {
+float line(float center, float size, float edge, float coord) {
 	return max(
         max(
-        	smoothstep(center - size - edge, center - size, y) *
-            smoothstep(center + size + edge, center + size, y),
-        	smoothstep(center + size + edge - 1.0, center + size - 1.0, y)
+        	smoothstep(center - size - edge, center - size, coord) *
+            smoothstep(center + size + edge, center + size, coord),
+        	smoothstep(center + size + edge - 1.0, center + size - 1.0, coord)
         ),
-        smoothstep(center - size + 1.0 - edge, center - size + 1.0, y)
+        smoothstep(center - size + 1.0 - edge, center - size + 1.0, coord)
     );
 }
 

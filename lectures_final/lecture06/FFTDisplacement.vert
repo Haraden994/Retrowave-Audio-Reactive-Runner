@@ -1,7 +1,5 @@
 #version 330 core
 
-#define NUM_OCTAVES 5
-
 // vertex position in world coordinates
 layout (location = 0) in vec3 position;
 // vertex normal in world coordinate
@@ -38,6 +36,8 @@ out vec3 lightDir;
 out vec3 vNormal;
 out vec3 vViewPosition;
 out vec3 vPosition;
+
+int NUM_OCTAVES = 5;
 
 float rand(vec2 n)
 { 
